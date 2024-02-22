@@ -10,17 +10,17 @@ from .permissions import IsOwnerOrReadOnly
 from .serializers import ReviewSerializer
 
 
-class CommentViewSet(viewsets.ModelViewSet):
-    serializer_class = CommentSerializer
+class ReviewViewSet(viewsets.ModelViewSet):
+    serializer_class = ReviewSerializer
     permission_classes = (IsOwnerOrReadOnly, IsAuthenticatedOrReadOnly)
 
-    def get_post(self):
-        return get_object_or_404(Post, id=self.kwargs['post_id'])
+    def get_title(self):
+        return get_object_or_404(Review, id=self.kwargs['title_id'])
 
     def get_queryset(self):
-        return self.get_post().comments.all()
+        return self.get_title().reviews.all()
 
     def perform_create(self, serializer):
         serializer.save(
             author=self.request.user,
-            post=self.get_post())
+            title=self.get_title())
