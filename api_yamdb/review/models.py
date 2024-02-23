@@ -1,7 +1,9 @@
-from django.contrib.auth import get_user_model
+from django.contrib.auth.models import AbstractUser
 from django.db import models
 
-User = get_user_model()
+
+class CustomUser(AbstractUser):
+    pass
 
 
 class Title(models.Model):
@@ -11,7 +13,7 @@ class Title(models.Model):
 class Review(models.Model):
     text = models.TextField()
     author = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name='reviews')
+        CustomUser, on_delete=models.CASCADE, related_name='reviews')
     score = models.IntegerField()
     title = models.ForeignKey(
         Title, on_delete=models.CASCADE, related_name='reviews')
