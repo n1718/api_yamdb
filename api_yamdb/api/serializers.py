@@ -2,7 +2,7 @@ from rest_framework import serializers
 from django.utils import timezone
 from django.db.models import Avg
 
-from reviews.models import Genre, Category, Title
+from review.models import Genre, Category, Title, Review
 
 
 class GenreSerializer(serializers.ModelSerializer):
@@ -59,10 +59,6 @@ class TitleCreateSerializer(serializers.ModelSerializer):
                     'Год создания должен быть нашей эры и не больше текущего.'
                 )
             return value
-from rest_framework import serializers
-from rest_framework.relations import SlugRelatedField
-
-from review.models import Review
 
 
 class ReviewSerializer(serializers.ModelSerializer):

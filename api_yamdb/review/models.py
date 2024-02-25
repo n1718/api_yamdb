@@ -5,28 +5,6 @@ from django.core.validators import MinValueValidator
 from .validators import validate_year
 
 
-class Category(models.Model):
-    """Категории произведений."""
-
-    name = models.CharField(
-        max_length=256,
-        verbose_name='Название категории'
-    )
-    slug = models.SlugField(
-        unique=True,
-        max_length=50,
-        verbose_name='Слаг категории'
-    )
-
-    def __str__(self) -> str:
-        return self.name
-
-    class Meta:
-        verbose_name = 'атегория'
-        verbose_name_plural = 'Категории'
-
-
-
 class CustomUser(AbstractUser):
     pass
 
@@ -48,7 +26,7 @@ class Category(models.Model):
         return self.name
 
     class Meta:
-        verbose_name = 'атегория'
+        verbose_name = 'категория'
         verbose_name_plural = 'Категории'
 
 
