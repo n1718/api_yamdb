@@ -1,7 +1,12 @@
+from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.core.validators import MinValueValidator
 
 from .validators import validate_year
+
+
+class CustomUser(AbstractUser):
+    pass
 
 
 class Category(models.Model):
@@ -75,6 +80,7 @@ class Title(models.Model):
         related_name='category',
         verbose_name='Категория',
     )
+
 
 class Review(models.Model):
     text = models.TextField()
