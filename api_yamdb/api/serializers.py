@@ -2,7 +2,7 @@ from rest_framework import serializers
 from django.utils import timezone
 from django.db.models import Avg
 
-from review.models import Genre, Category, Title, Review
+from review.models import Genre, Category, Title, Review, Comment
 
 
 class GenreSerializer(serializers.ModelSerializer):
@@ -70,3 +70,14 @@ class ReviewSerializer(serializers.ModelSerializer):
         fields = ('id', 'author', 'text', 'score', 'pub_date', 'title')
         model = Review
         read_only_fields = ('title',)
+
+
+class CommentSerializer(serializers.ModelSerializer):
+    author = serializers.SlugRelatedField(
+        read_only=True, slug_field='username'
+    )
+
+    class Meta:
+        fields = ('id', 'author', 'text', 'created', 'review')
+        model = Comment
+        read_only_fields = ('review',)

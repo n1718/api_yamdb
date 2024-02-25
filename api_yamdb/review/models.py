@@ -1,12 +1,11 @@
-from django.contrib.auth.models import AbstractUser
+from django.contrib.auth import get_user_model
 from django.db import models
 from django.core.validators import MinValueValidator
 
 from .validators import validate_year
 
 
-class CustomUser(AbstractUser):
-    pass
+User = get_user_model()
 
 
 class Category(models.Model):
@@ -69,7 +68,7 @@ class Title(models.Model):
     )
     genre = models.ManyToManyField(
         Genre,
-        through='GenreConnect',
+        through='GenreTitle',
         related_name='genre',
         verbose_name='Жанр'
     )
@@ -85,9 +84,33 @@ class Title(models.Model):
 class Review(models.Model):
     text = models.TextField()
     author = models.ForeignKey(
-        CustomUser, on_delete=models.CASCADE, related_name='reviews')
+        User, on_delete=models.CASCADE, related_name='reviews')
     score = models.IntegerField()
     title = models.ForeignKey(
         Title, on_delete=models.CASCADE, related_name='reviews')
     pub_date = models.DateTimeField(
         'Дата публикации', auto_now_add=True, db_index=True)
+
+
+class Comment(models.Model):
+    text = models.TextField()
+    author = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name="comments")
+    pub_date = models.DateTimeField(
+        'Дата публикации', auto_now_add=True)
+    review = models.ForeignKey(
+        Review, on_delete=models.CASCADE, related_name='comments')
+
+
+class GenreTitle(models.Model):
+    title = models.ForeignKey(
+        Title,
+        on_delete=models.CASCADE
+    )
+    genre = models.ForeignKey(
+        Genre,
+        on_delete=models.CASCADE
+    )
+
+    def __str__(self) -> str:
+        return self.genre
