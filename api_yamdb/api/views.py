@@ -63,7 +63,8 @@ def generate_token(user):
 
 
 def get_tokens_for_user(user):
-    if default_token_generator.check_token(user, generate_token()):
+    access_token = ''
+    if default_token_generator.check_token(user, generate_token(user)):
         access_token = AccessToken.for_user(user)
 
     return {
