@@ -1,8 +1,10 @@
 from rest_framework import serializers
 from django.utils import timezone
 from django.db.models import Avg
+from django.core.validators import RegexValidator
+from rest_framework import serializers
 
-from review.models import Genre, Category, Title, Review, Comment
+from review.models import Genre, Category, Title, Review, Comment, CustomUser
 
 
 class GenreSerializer(serializers.ModelSerializer):
@@ -81,10 +83,6 @@ class CommentSerializer(serializers.ModelSerializer):
         fields = ('id', 'author', 'text', 'created', 'review')
         model = Comment
         read_only_fields = ('review',)
-from django.core.validators import RegexValidator
-from rest_framework import serializers
-
-from review.models import CustomUser
 
 
 class CustomUserSerializer(serializers.ModelSerializer):

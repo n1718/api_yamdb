@@ -1,16 +1,41 @@
 from django.contrib.auth import get_user_model
 from django.db import models
 from django.core.validators import MinValueValidator
+from django.contrib.auth.models import AbstractUser
 
 from .validators import validate_year
 
 
-User = get_user_model()
+ROLE_CHOICES = [
+    ('user', 'User'),
+    ('moderator', 'Moderator'),
+    ('admin', 'Admin'),
+]
+
+
+class CustomUser(AbstractUser):
+    username = models.CharField(unique=True, max_length=150, blank=False,)
+    email = models.EmailField(unique=True, max_length=254, blank=False,)
+    first_name = models.TextField(max_length=150,)
+    last_name = models.TextField(max_length=150,)
+    bio = models.TextField()
+    role = models.CharField(
+        default='user', choices=ROLE_CHOICES, max_length=150
+    )
+    groups = models.ManyToManyField(
+        'auth.Group',
+        related_name='customuser_groups',
+        blank=True,
+    )
+    user_permissions = models.ManyToManyField(
+        'auth.Permission',
+        related_name='customuser_user_permissions',
+        blank=True,
+    )
 
 
 class Category(models.Model):
     """Категории произведений."""
-
     name = models.CharField(
         max_length=256,
         verbose_name='Название категории'
@@ -51,25 +76,6 @@ class Genre(models.Model):
 
 class Title(models.Model):
     """Произведения."""
-from django.contrib.auth.models import AbstractUser
-
-ROLE_CHOICES = [
-    ('user', 'User'),
-    ('moderator', 'Moderator'),
-    ('admin', 'Admin'),
-]
-
-
-class CustomUser(AbstractUser):
-    username = models.CharField(unique=True, max_length=150, blank=False,)
-    email = models.EmailField(unique=True, max_length=254, blank=False,)
-    first_name = models.TextField(max_length=150,)
-    last_name = models.TextField(max_length=150,)
-    bio = models.TextField()
-    role = models.CharField(
-        default='user', choices=ROLE_CHOICES, max_length=150
-    )
-
     name = models.CharField(
         max_length=100,
         verbose_name='Название произведения'
@@ -102,7 +108,7 @@ class CustomUser(AbstractUser):
 class Review(models.Model):
     text = models.TextField()
     author = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name='reviews')
+        CustomUser, on_delete=models.CASCADE, related_name='reviews')
     score = models.IntegerField()
     title = models.ForeignKey(
         Title, on_delete=models.CASCADE, related_name='reviews')
@@ -113,7 +119,7 @@ class Review(models.Model):
 class Comment(models.Model):
     text = models.TextField()
     author = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name="comments")
+        CustomUser, on_delete=models.CASCADE, related_name="comments")
     pub_date = models.DateTimeField(
         'Дата публикации', auto_now_add=True)
     review = models.ForeignKey(
@@ -132,14 +138,3 @@ class GenreTitle(models.Model):
 
     def __str__(self) -> str:
         return self.genre
-    groups = models.ManyToManyField(
-        'auth.Group',
-        related_name='customuser_groups',
-        blank=True,
-    )
-
-    user_permissions = models.ManyToManyField(
-        'auth.Permission',
-        related_name='customuser_user_permissions',
-        blank=True,
-    )

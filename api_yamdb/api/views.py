@@ -1,31 +1,21 @@
 from rest_framework import filters
 from django.shortcuts import get_object_or_404
 from rest_framework import viewsets
-from rest_framework.permissions import IsAuthenticatedOrReadOnly
+from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAdminUser
+from django.contrib.auth.tokens import default_token_generator
+from rest_framework_simplejwt.tokens import AccessToken
 
 from .permissions import IsOwnerOrReadOnly
 from .filters import TitleFilter
 from .viewsets import CreateListDestroyViewSet
-from review.models import Category, Genre, Title, Review
+from review.models import Category, Genre, Title, Review, CustomUser
 from .serializers import (CategorySerializer,
                           GenreSerializer,
                           TitleSerializer,
                           TitleCreateSerializer,
-                          ReviewSerializer, CommentSerializer)
-from django.shortcuts import render
-from rest_framework import status, viewsets
-from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import IsAdminUser
-from rest_framework.response import Response
-from rest_framework.authtoken.models import Token
-from review.models import CustomUser
-from .serializers import CustomUserSerializer
-from django.core.mail import send_mail
-from django.conf import settings
-import random
-import string
-from django.contrib.auth.tokens import default_token_generator
-from rest_framework_simplejwt.tokens import RefreshToken, AccessToken
+                          ReviewSerializer,
+                          CommentSerializer,
+                          CustomUserSerializer)
 
 
 class CustomUserViewSet(viewsets.ModelViewSet):
@@ -108,25 +98,6 @@ class CommentViewSet(viewsets.ModelViewSet):
         serializer.save(
             author=self.request.user,
             post=self.get_review())
-#     send_mail(
-#         'Код подтверждения',
-#         f'Ваш код подтверждения: {confirmation_code}',
-#         settings.EMAIL_HOST_USER,  # Добавить параметр в settings.py(?)
-#         [email],
-#         fail_silently=False,
-#     )
-
-#     user = CustomUser.objects.create_user(
-#         username=username, email=email, password=confirmation_code
-#     )
-#     user.save()
-
-#     return Response(
-#         {'detail': 'Код подтверждения отправлен на указанный email'},
-#         status=status.HTTP_201_CREATED
-#     )
-
-#     return token
 
 
 def generate_token(user):
