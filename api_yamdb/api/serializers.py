@@ -133,8 +133,27 @@ class SignUpSerializer(serializers.ModelSerializer):
 
 
 class TokenSerializer(serializers.ModelSerializer):
-    ...  # Обрабатывает получение JWT-токена и confirmition-code
-    confirmation_code = models.CharField()
+    username = serializers.CharField()
+    confirmation_code = serializers.CharField()
+
+    def validate(self, data):
+        username = data.get('username')
+        confirmation_code = data.get('confirmation_code')
+
+        if not username or not confirmation_code:
+            raise serializers.ValidationError(
+                'Обязательные для валидации поля отсутствуют'
+            )
+
+        try:
+            user = CustomUser.objects.get(username=username)
+        except CustomUser.DoesNotExist:
+            serializers.ValidationError('Пользователь не существует')
+
+        if user.confirmation_code != confirmation_code:
+            raise serializers.ValidationError('Неверный код подтверждения')
+
+        return data
 
     class Meta:
         model = CustomUser

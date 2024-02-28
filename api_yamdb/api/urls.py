@@ -4,6 +4,7 @@ from . import views
 
 from .views import TitleViewSet, CategoryViewSet, GenreViewSet, ReviewViewSet, CommentViewSet, SignUp, GetToken, MeViewSet, CustomUserViewSet
 
+app_name = 'api'
 
 router_v1 = DefaultRouter()
 router_v1.register(r'users', views.CustomUserViewSet, basename='users')

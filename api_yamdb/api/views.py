@@ -101,6 +101,9 @@ class SignUp(generics.CreateAPIView):
                 username=username, email=email
             )
             confirmation_code = default_token_generator.make_token(user)
+            user.confirmation_code = confirmation_code
+            user.save()
+
             send_mail(
                 'Код подтверждения',
                 f'Ваш код подтверждения: {confirmation_code}',
@@ -108,6 +111,7 @@ class SignUp(generics.CreateAPIView):
                 [email],
                 fail_silently=False,
             )
+
             return Response(serializer.data, status=status.HTTP_200_OK)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -116,21 +120,16 @@ class SignUp(generics.CreateAPIView):
 class GetToken(generics.CreateAPIView):
     def post(self, request):
         serializer = TokenSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        username = serializer.validated_data.get('username')
-        confirmation_code = serializer.validated_data.get('confirmation_code')
-        user = get_object_or_404(CustomUser, username=username)
+        if serializer.is_valid():
+            username = serializer.validated_data.get('username')
+            user = get_object_or_404(CustomUser, username=username)
 
-        if default_token_generator.check_token(user, confirmation_code):
             return Response(
                 {'token': str(AccessToken.for_user(user))},
                 status=status.HTTP_200_OK
             )
 
-        return Response(
-            {'confirmation_code': 'Неверный код подтверждения'},
-            status=status.HTTP_400_BAD_REQUEST
-        )
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class MeViewSet(viewsets.ModelViewSet):
