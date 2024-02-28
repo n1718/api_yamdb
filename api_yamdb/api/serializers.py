@@ -3,7 +3,6 @@ from django.utils import timezone
 from django.db.models import Avg
 from django.core.validators import RegexValidator
 from rest_framework import serializers
-from django.db import models
 
 from review.models import Genre, Category, Title, Review, Comment, CustomUser
 
