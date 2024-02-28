@@ -4,6 +4,7 @@ from django.db.models import Avg
 from django.core.validators import RegexValidator
 from rest_framework import serializers
 from django.db import models
+from rest_framework.validators import UniqueTogetherValidator
 
 from review.models import Genre, Category, Title, Review, Comment, CustomUser
 
@@ -68,11 +69,18 @@ class ReviewSerializer(serializers.ModelSerializer):
     author = serializers.SlugRelatedField(
         read_only=True, slug_field='username'
     )
+    score = serializers.IntegerField(min_value=1, max_value=10)
 
     class Meta:
         fields = ('id', 'author', 'text', 'score', 'pub_date', 'title')
         model = Review
         read_only_fields = ('title',)
+        validators = [
+            UniqueTogetherValidator(
+                queryset=Review.objects.all(),
+                fields=['author', 'title']
+            )
+        ]
 
 
 class CommentSerializer(serializers.ModelSerializer):

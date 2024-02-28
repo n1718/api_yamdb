@@ -57,7 +57,7 @@ class TitleViewSet(viewsets.ModelViewSet):
 
 class ReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer
-    permission_classes = (IsOwnerOrReadOnly, IsAuthenticatedOrReadOnly)
+    permission_classes = (IsOwnerOrReadOnly, IsAuthenticatedOrReadOnly,)
 
     def get_title(self):
         return get_object_or_404(Review, id=self.kwargs['title_id'])
@@ -73,7 +73,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
 
 class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
-    permission_classes = (IsOwnerOrReadOnly, IsAuthenticatedOrReadOnly)
+    permission_classes = (IsOwnerOrReadOnly,)
 
     def get_review(self):
         return get_object_or_404(Review, id=self.kwargs['review_id'])
