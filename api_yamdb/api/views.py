@@ -7,7 +7,7 @@ from django.contrib.auth.tokens import default_token_generator
 from rest_framework_simplejwt.tokens import AccessToken
 from rest_framework.response import Response
 
-from .permissions import IsOwnerOrReadOnly
+from .permissions import IsOwnerOrReadOnly, IsAdminOrReadOnly
 from .filters import TitleFilter
 from .viewsets import CreateListDestroyViewSet
 from review.models import Category, Genre, Title, Review, CustomUser
@@ -57,10 +57,10 @@ class TitleViewSet(viewsets.ModelViewSet):
 
 class ReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer
-    permission_classes = (IsOwnerOrReadOnly, IsAuthenticatedOrReadOnly,)
+    permission_classes = (IsAdminOrReadOnly, IsOwnerOrReadOnly, IsAuthenticatedOrReadOnly,)
 
     def get_title(self):
-        return get_object_or_404(Review, id=self.kwargs['title_id'])
+        return get_object_or_404(Title, id=self.kwargs['title_id'])
 
     def get_queryset(self):
         return self.get_title().reviews.all()
@@ -73,7 +73,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
 
 class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
-    permission_classes = (IsOwnerOrReadOnly,)
+    permission_classes = (IsOwnerOrReadOnly, IsAuthenticatedOrReadOnly,)
 
     def get_review(self):
         return get_object_or_404(Review, id=self.kwargs['review_id'])

@@ -3,6 +3,7 @@ from django.utils import timezone
 from django.db.models import Avg
 from django.core.validators import RegexValidator
 from rest_framework import serializers
+from rest_framework.validators import UniqueTogetherValidator
 
 from review.models import Genre, Category, Title, Review, Comment, CustomUser
 
@@ -83,6 +84,12 @@ class CommentSerializer(serializers.ModelSerializer):
         fields = ('id', 'author', 'text', 'created', 'review')
         model = Comment
         read_only_fields = ('review',)
+        validators = [
+            UniqueTogetherValidator(
+                queryset=Review.objects.all(),
+                fields=['author', 'title']
+            )
+        ]
 
 
 class CustomUserSerializer(serializers.ModelSerializer):
