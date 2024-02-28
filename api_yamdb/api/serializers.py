@@ -81,15 +81,9 @@ class CommentSerializer(serializers.ModelSerializer):
     )
 
     class Meta:
-        fields = ('id', 'author', 'text', 'created', 'review')
+        fields = ('id', 'author', 'text', 'pub_date')
         model = Comment
-        read_only_fields = ('review',)
-        validators = [
-            UniqueTogetherValidator(
-                queryset=Review.objects.all(),
-                fields=['author', 'title']
-            )
-        ]
+        read_only_fields = ('pub_date',)
 
 
 class CustomUserSerializer(serializers.ModelSerializer):

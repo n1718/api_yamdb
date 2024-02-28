@@ -119,7 +119,7 @@ class Comment(models.Model):
     pub_date = models.DateTimeField(
         'Дата публикации', auto_now_add=True)
     review = models.ForeignKey(
-        Review, on_delete=models.CASCADE, related_name='comments')
+        Review, on_delete=models.CASCADE, null=False, blank=False, related_name='comments')
 
 
 class GenreTitle(models.Model):
