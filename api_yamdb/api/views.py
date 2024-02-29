@@ -4,15 +4,15 @@ from django.core.mail import send_mail
 from django.shortcuts import get_object_or_404
 from rest_framework import viewsets, status, generics
 from rest_framework.pagination import PageNumberPagination
-from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAdminUser
+from rest_framework.permissions import IsAdminUser
 from django.contrib.auth.tokens import default_token_generator
 from rest_framework_simplejwt.tokens import AccessToken
 from rest_framework.response import Response
 
-from .permissions import IsOwnerOrReadOnly, IsSuperUserOrOwnerOrReadOnly
+from .permissions import IsSuperUserOrOwnerOrReadOnly
 from .filters import TitleFilter
 from .viewsets import CreateListDestroyViewSet
-from review.models import Category, Genre, Title, Review, CustomUser
+from reviews.models import Category, Genre, Title, Review, CustomUser
 from .serializers import (CategorySerializer,
                           GenreSerializer,
                           TitleSerializer,
@@ -60,6 +60,7 @@ class TitleViewSet(viewsets.ModelViewSet):
 class ReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer
     permission_classes = (IsSuperUserOrOwnerOrReadOnly,)
+    http_method_names = ['get', 'post', 'head', 'patch', 'delete']
 
     def get_title(self):
         return get_object_or_404(Title, id=self.kwargs['title_id'])
@@ -73,9 +74,10 @@ class ReviewViewSet(viewsets.ModelViewSet):
             title=self.get_title())
 
 
-class CommentViewSet(CreateListDestroyViewSet):
+class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
     permission_classes = (IsSuperUserOrOwnerOrReadOnly,)
+    http_method_names = ['get', 'post', 'head', 'patch', 'delete']
     pagination_class = PageNumberPagination
     filter_backends = (DjangoFilterBackend,)
 

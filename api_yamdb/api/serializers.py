@@ -3,9 +3,8 @@ from django.utils import timezone
 from django.db.models import Avg
 from django.core.validators import RegexValidator
 from rest_framework import serializers
-from rest_framework.validators import UniqueTogetherValidator
 
-from review.models import Genre, Category, Title, Review, Comment, CustomUser
+from reviews.models import Title, Review, Genre, Category, Comment, CustomUser
 
 
 class GenreSerializer(serializers.ModelSerializer):
@@ -73,6 +72,17 @@ class ReviewSerializer(serializers.ModelSerializer):
         fields = ('id', 'author', 'text', 'score', 'pub_date', 'title')
         model = Review
         read_only_fields = ('title',)
+
+    def validate(self, data):
+        if not self.context.get('request').method == 'POST':
+            return data
+        author = self.context.get('request').user
+        title_id = self.context.get('view').kwargs.get('title_id')
+        if Review.objects.filter(author=author, title=title_id).exists():
+            raise serializers.ValidationError(
+                'Можно оставить только один отзыв на произведение!'
+            )
+        return data
 
 
 class CommentSerializer(serializers.ModelSerializer):

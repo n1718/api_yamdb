@@ -23,7 +23,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'rest_framework_simplejwt',
-    'review',
+    'reviews',
     'api',
 ]
 
@@ -135,7 +135,7 @@ AUTHENTICATION_BACKENDS = [
 
 # User
 
-AUTH_USER_MODEL = 'review.CustomUser'
+AUTH_USER_MODEL = 'reviews.CustomUser'
 
 
 # EMAIL

@@ -1,6 +1,6 @@
 from django.contrib.auth import get_user_model
 from django.db import models
-from django.core.validators import MinValueValidator
+from django.core.validators import MinValueValidator, MaxValueValidator
 from django.contrib.auth.models import AbstractUser
 
 from .validators import validate_year
@@ -97,7 +97,18 @@ class Review(models.Model):
     text = models.TextField()
     author = models.ForeignKey(
         CustomUser, on_delete=models.CASCADE, related_name='reviews')
-    score = models.IntegerField()
+    score = models.PositiveSmallIntegerField(
+        validators=[
+            MinValueValidator(
+                1,
+                message='Оценка имеет границы от 1 до 10'
+            ),
+            MaxValueValidator(
+                10,
+                message='Оценка имеет границы от 1 до 10'
+            ),
+        ]
+        )
     title = models.ForeignKey(
         Title, on_delete=models.CASCADE, related_name='reviews')
     pub_date = models.DateTimeField(
