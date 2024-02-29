@@ -9,7 +9,7 @@ from django.contrib.auth.tokens import default_token_generator
 from rest_framework_simplejwt.tokens import AccessToken
 from rest_framework.response import Response
 
-from .permissions import IsOwnerOrReadOnly, IsAdminOrReadOnly
+from .permissions import IsOwnerOrReadOnly, IsSuperUserOrOwnerOrReadOnly
 from .filters import TitleFilter
 from .viewsets import CreateListDestroyViewSet
 from review.models import Category, Genre, Title, Review, CustomUser
@@ -59,7 +59,7 @@ class TitleViewSet(viewsets.ModelViewSet):
 
 class ReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer
-    permission_classes = (IsAdminOrReadOnly, IsOwnerOrReadOnly, IsAuthenticatedOrReadOnly,)
+    permission_classes = (IsSuperUserOrOwnerOrReadOnly,)
 
     def get_title(self):
         return get_object_or_404(Title, id=self.kwargs['title_id'])
@@ -75,7 +75,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
 
 class CommentViewSet(CreateListDestroyViewSet):
     serializer_class = CommentSerializer
-    permission_classes = (IsOwnerOrReadOnly, IsAuthenticatedOrReadOnly,)
+    permission_classes = (IsSuperUserOrOwnerOrReadOnly,)
     pagination_class = PageNumberPagination
     filter_backends = (DjangoFilterBackend,)
 

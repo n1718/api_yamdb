@@ -110,6 +110,7 @@ class Review(models.Model):
                 name='unique_pair'
             ),
         ]
+        ordering = ('pub_date',)
 
 
 class Comment(models.Model):
