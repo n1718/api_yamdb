@@ -1,4 +1,3 @@
-from django.contrib.auth import get_user_model
 from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.contrib.auth.models import AbstractUser
@@ -24,6 +23,7 @@ class CustomUser(AbstractUser):
 
 class Category(models.Model):
     """Категории произведений."""
+
     name = models.CharField(
         max_length=256,
         verbose_name='Название категории'
@@ -64,6 +64,7 @@ class Genre(models.Model):
 
 class Title(models.Model):
     """Произведения."""
+
     name = models.CharField(
         max_length=100,
         verbose_name='Название произведения'
@@ -108,7 +109,7 @@ class Review(models.Model):
                 message='Оценка имеет границы от 1 до 10'
             ),
         ]
-        )
+    )
     title = models.ForeignKey(
         Title, on_delete=models.CASCADE, related_name='reviews')
     pub_date = models.DateTimeField(
@@ -131,7 +132,12 @@ class Comment(models.Model):
     pub_date = models.DateTimeField(
         'Дата публикации', auto_now_add=True)
     review = models.ForeignKey(
-        Review, on_delete=models.CASCADE, null=False, blank=False, related_name='comments')
+        Review,
+        on_delete=models.CASCADE,
+        null=False,
+        blank=False,
+        related_name='comments'
+    )
 
 
 class GenreTitle(models.Model):
