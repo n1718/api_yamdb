@@ -125,10 +125,10 @@ SIMPLE_JWT = {
     'SIGNING_KEY': SECRET_KEY
 }
 
-AUTHENTICATION_BACKENDS = [
-    'django.contrib.auth.backends.ModelBackend',
-    'rest_framework_simplejwt.backends.TokenBackend',
-]
+# AUTHENTICATION_BACKENDS = [
+#     'django.contrib.auth.backends.ModelBackend',
+#     'rest_framework_simplejwt.backends.TokenBackend',
+# ]
 
 
 # User

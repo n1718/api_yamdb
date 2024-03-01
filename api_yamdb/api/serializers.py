@@ -146,11 +146,10 @@ class TokenSerializer(serializers.ModelSerializer):
 
         try:
             user = CustomUser.objects.get(username=username)
+            if user.confirmation_code != confirmation_code:
+                raise serializers.ValidationError('Неверный код подтверждения')
         except CustomUser.DoesNotExist:
             serializers.ValidationError('Пользователь не существует')
-
-        if user.confirmation_code != confirmation_code:
-            raise serializers.ValidationError('Неверный код подтверждения')
 
         return data
 
@@ -160,4 +159,8 @@ class TokenSerializer(serializers.ModelSerializer):
 
 
 class MeSerializer(serializers.ModelSerializer):
-    ...  # Изменение данных своего профиля
+    # Изменение данных своего профиля
+
+    class Meta:
+        model = CustomUser
+        fields = ('username', 'email', 'first_name', 'last_name', 'bio', 'role')

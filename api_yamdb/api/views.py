@@ -2,10 +2,13 @@ from rest_framework import filters
 from django.core.mail import send_mail
 from django.shortcuts import get_object_or_404
 from rest_framework import viewsets, status, generics
-from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAdminUser
+from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAdminUser, IsAuthenticated
 from django.contrib.auth.tokens import default_token_generator
 from rest_framework_simplejwt.tokens import AccessToken
+from rest_framework.views import APIView
 from rest_framework.response import Response
+from rest_framework.decorators import action
+from rest_framework import serializers
 
 from .permissions import IsOwnerOrReadOnly
 from .filters import TitleFilter
@@ -19,13 +22,21 @@ from .serializers import (CategorySerializer,
                           CommentSerializer,
                           CustomUserSerializer,
                           SignUpSerializer,
-                          TokenSerializer)
+                          TokenSerializer,
+                          MeSerializer,)
 
 
 class CustomUserViewSet(viewsets.ModelViewSet):
     queryset = CustomUser.objects.all()
     serializer_class = CustomUserSerializer
-    permission_classes = (IsAdminUser,)
+    http_method_names = ['get', 'post', 'head', 'patch', 'delete']
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ('username',)
+    permission_classes = (
+        IsAuthenticated,
+        # IsRequiredScopes
+    )
+    # required_scopes = ['См. Redoc']
 
 
 class GenreViewSet(CreateListDestroyViewSet):
@@ -123,14 +134,28 @@ class GetToken(generics.CreateAPIView):
         if serializer.is_valid():
             username = serializer.validated_data.get('username')
             user = get_object_or_404(CustomUser, username=username)
+            token = AccessToken.for_user(user)
+            token['payload'] = user.role
 
             return Response(
-                {'token': str(AccessToken.for_user(user))},
+                {'token': str(token)},
                 status=status.HTTP_200_OK
             )
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class MeViewSet(viewsets.ModelViewSet):
-    ...
+class MeView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        serializer = MeSerializer(request.user)
+        return Response(serializer.data)
+
+    def patch(self, request):
+        if request.user.role == 'user':
+            serializer = MeSerializer(request.user, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

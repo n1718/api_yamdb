@@ -10,8 +10,8 @@ from .views import (
     CommentViewSet,
     SignUp,
     GetToken,
-    MeViewSet,
-    CustomUserViewSet
+    CustomUserViewSet,
+    MeView
 )
 
 app_name = 'api'
@@ -36,5 +36,5 @@ urlpatterns = [
     path('v1/', include(router_v1.urls)),
     path('v1/auth/signup/', SignUp.as_view(), name='signup'),
     path('v1/auth/token/', GetToken.as_view(), name='token'),
-    path('v1/users/me/', MeViewSet, name='me'),
+    path('v1/users/me/', MeView.as_view(), name='me'),
 ]
