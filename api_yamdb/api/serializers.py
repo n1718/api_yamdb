@@ -88,9 +88,10 @@ class CommentSerializer(serializers.ModelSerializer):
 class CustomUserSerializer(serializers.ModelSerializer):
     validators = [
         RegexValidator(
-            regex=r'^[\w.@+-]+$',
+            regex=r'^[\w.@+-]+\Z',
             message='Введите корректное имя пользователя',
-            code='invalid_username'
+            code='invalid_username',
+            inverse_match=True
         )
     ]
 

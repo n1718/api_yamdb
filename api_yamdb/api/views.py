@@ -154,7 +154,9 @@ class MeView(APIView):
 
     def patch(self, request):
         if request.user.role == 'user':
-            serializer = MeSerializer(request.user, data=request.data, partial=True)
+            serializer = MeSerializer(
+                request.user, data=request.data, partial=True
+            )
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
