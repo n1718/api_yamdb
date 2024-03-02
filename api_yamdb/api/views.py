@@ -10,7 +10,7 @@ from rest_framework.pagination import LimitOffsetPagination
 from django_filters.rest_framework import DjangoFilterBackend
 from .permissions import IsOwnerOrReadOnly, IsSuperUserOrReadOnly
 from .filters import TitleFilter
-from .viewsets import CreateListDestroyViewSet
+
 from review.models import Category, Genre, Title, Review, CustomUser
 from .serializers import (CategorySerializer,
                           GenreSerializer,
@@ -38,6 +38,12 @@ class GenreViewSet(viewsets.ModelViewSet):
     search_fields = ('name',)
     lookup_field = 'slug'
 
+    def retrieve(self, request, *args, **kwargs):
+        return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
+
+    def update(self, request, *args, **kwargs):
+        return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
+
 
 class CategoryViewSet(viewsets.ModelViewSet):
     queryset = Category.objects.all()
@@ -47,6 +53,12 @@ class CategoryViewSet(viewsets.ModelViewSet):
     filter_backends = (filters.SearchFilter,)
     search_fields = ('name',)
     lookup_field = 'slug'
+
+    def retrieve(self, request, *args, **kwargs):
+        return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
+
+    def update(self, request, *args, **kwargs):
+        return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
 
 class TitleViewSet(viewsets.ModelViewSet):
