@@ -1,31 +1,25 @@
-from rest_framework import filters
+from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
 from django.shortcuts import get_object_or_404
-from rest_framework import viewsets, status, generics
-from rest_framework.permissions import IsAuthenticated
-from django.contrib.auth.tokens import default_token_generator
-from rest_framework_simplejwt.tokens import AccessToken
-from rest_framework.response import Response
-from rest_framework.pagination import LimitOffsetPagination
 from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import filters, generics, status, viewsets
 from rest_framework.decorators import action
-from rest_framework.pagination import PageNumberPagination
+from rest_framework.pagination import (LimitOffsetPagination,
+                                       PageNumberPagination)
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework_simplejwt.tokens import AccessToken
 
-from .permissions import (IsSuperUser,
-                          IsSuperUserOrReadOnly,
-                          IsSuperUserOrOwnerOrReadOnly)
+from reviews.models import Category, CustomUser, Genre, Review, Title
+
 from .filters import TitleFilter
-from reviews.models import Category, Genre, Title, Review, CustomUser
-from .serializers import (CategorySerializer,
-                          GenreSerializer,
-                          TitleSerializer,
-                          TitleCreateSerializer,
-                          ReviewSerializer,
-                          CommentSerializer,
-                          SignUpSerializer,
-                          TokenSerializer,
-                          CustomUserSerializer,
-                          CustomUserUpdateSerializer)
+from .permissions import (IsSuperUser, IsSuperUserOrOwnerOrReadOnly,
+                          IsSuperUserOrReadOnly)
+from .serializers import (CategorySerializer, CommentSerializer,
+                          CustomUserSerializer, CustomUserUpdateSerializer,
+                          GenreSerializer, ReviewSerializer, SignUpSerializer,
+                          TitleCreateSerializer, TitleSerializer,
+                          TokenSerializer)
 
 
 class CustomUserViewSet(viewsets.ModelViewSet):

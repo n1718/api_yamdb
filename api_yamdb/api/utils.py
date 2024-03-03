@@ -1,6 +1,6 @@
-from rest_framework.exceptions import ValidationError
-
 import re
+
+from rest_framework.exceptions import ValidationError
 
 
 def validate_name(value):
