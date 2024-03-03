@@ -1,27 +1,19 @@
-from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters
 from django.core.mail import send_mail
 from django.shortcuts import get_object_or_404
 from rest_framework import viewsets, status, generics
-from rest_framework.pagination import PageNumberPagination
-from rest_framework.permissions import IsAdminUser
-from rest_framework.permissions import (
-    IsAuthenticatedOrReadOnly, IsAuthenticated
-)
+from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth.tokens import default_token_generator
 from rest_framework_simplejwt.tokens import AccessToken
 from rest_framework.response import Response
 from rest_framework.pagination import LimitOffsetPagination
 from django_filters.rest_framework import DjangoFilterBackend
-from .permissions import IsOwnerOrReadOnly, IsSuperUserOrReadOnly
 from rest_framework.decorators import action
 from rest_framework.pagination import PageNumberPagination
 
-from .permissions import IsSuperUserOrOwnerOrReadOnly
-from .permissions import IsOwnerOrReadOnly, IsSuperUser
+from .permissions import IsSuperUser, IsSuperUserOrReadOnly, IsSuperUserOrOwnerOrReadOnly
 from .filters import TitleFilter
 
-from .viewsets import CreateListDestroyViewSet
 from reviews.models import Category, Genre, Title, Review, CustomUser
 from .serializers import (CategorySerializer,
                           GenreSerializer,
@@ -42,9 +34,8 @@ class CustomUserViewSet(viewsets.ModelViewSet):
     lookup_field = 'username'
     filter_backends = (filters.SearchFilter,)
     search_fields = ('username',)
-    permission_classes = (IsAuthenticated, IsSuperUser)
-    pagination_class = PageNumberPagination  # Недонастроил до конца,
-    # не могу выкупить, как можно получить параметр count из пагинатора
+    permission_classes = (IsAuthenticated, IsSuperUser,)
+    pagination_class = PageNumberPagination
 
     @action(
         methods=['get', 'patch', ], detail=False,

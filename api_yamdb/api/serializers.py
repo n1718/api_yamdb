@@ -5,7 +5,7 @@ from rest_framework import serializers
 
 from reviews.models import Title, Review, Genre, Category, Comment, CustomUser
 from reviews.models import Genre, Category, Title, Review, Comment, CustomUser
-from reviews.utils import validate_name, validate_email
+from .utils import validate_name, validate_email
 
 
 class GenreSerializer(serializers.ModelSerializer):

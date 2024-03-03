@@ -24,10 +24,6 @@ class IsSuperUserOrOwnerOrReadOnly(BasePermission):
 
 class IsSuperUserOrReadOnly(BasePermission):
     def has_permission(self, request, view):
-        # return (
-        #     request.method in SAFE_METHODS
-        #     or request.user.is_authenticated
-        # )
         if not request.user.is_authenticated:
             return request.method in SAFE_METHODS
         return (request.user.role == 'admin'
