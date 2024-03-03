@@ -1,9 +1,7 @@
-from rest_framework import serializers
 from django.utils import timezone
 from django.db.models import Avg
 from rest_framework import serializers
 
-from reviews.models import Title, Review, Genre, Category, Comment, CustomUser
 from reviews.models import Genre, Category, Title, Review, Comment, CustomUser
 from .utils import validate_name, validate_email
 

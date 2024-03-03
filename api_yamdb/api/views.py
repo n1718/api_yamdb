@@ -13,8 +13,7 @@ from rest_framework.pagination import PageNumberPagination
 
 from .permissions import IsSuperUser, IsSuperUserOrReadOnly, IsSuperUserOrOwnerOrReadOnly
 from .filters import TitleFilter
-
-from reviews.models import Category, Genre, Title, Review, CustomUser
+from reviews.models import Category, Genre, Title, Review, CustomUser, Comment
 from .serializers import (CategorySerializer,
                           GenreSerializer,
                           TitleSerializer,
