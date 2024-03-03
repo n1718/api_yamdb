@@ -15,7 +15,6 @@ from .permissions import IsOwnerOrReadOnly, IsSuperUserOrReadOnly
 from .permissions import IsSuperUserOrOwnerOrReadOnly
 from .filters import TitleFilter
 
-from review.models import Category, Genre, Title, Review, CustomUser
 from .viewsets import CreateListDestroyViewSet
 from reviews.models import Category, Genre, Title, Review, CustomUser
 from .serializers import (CategorySerializer,
