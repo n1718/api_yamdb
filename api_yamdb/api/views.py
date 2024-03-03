@@ -8,9 +8,14 @@ from rest_framework.permissions import IsAdminUser
 from django.contrib.auth.tokens import default_token_generator
 from rest_framework_simplejwt.tokens import AccessToken
 from rest_framework.response import Response
+from rest_framework.pagination import LimitOffsetPagination
+from django_filters.rest_framework import DjangoFilterBackend
+from .permissions import IsOwnerOrReadOnly, IsSuperUserOrReadOnly
 
 from .permissions import IsSuperUserOrOwnerOrReadOnly
 from .filters import TitleFilter
+
+from review.models import Category, Genre, Title, Review, CustomUser
 from .viewsets import CreateListDestroyViewSet
 from reviews.models import Category, Genre, Title, Review, CustomUser
 from .serializers import (CategorySerializer,
@@ -30,31 +35,51 @@ class CustomUserViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAdminUser,)
 
 
-class GenreViewSet(CreateListDestroyViewSet):
+class GenreViewSet(viewsets.ModelViewSet):
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
+    permission_classes = (IsSuperUserOrReadOnly,)
+    http_method_names = ['get', 'post', 'patch', 'delete']
     filter_backends = (filters.SearchFilter,)
     search_fields = ('name',)
     lookup_field = 'slug'
 
+    def retrieve(self, request, *args, **kwargs):
+        return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
-class CategoryViewSet(CreateListDestroyViewSet):
+    def update(self, request, *args, **kwargs):
+        return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
+
+
+class CategoryViewSet(viewsets.ModelViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
+    permission_classes = (IsSuperUserOrReadOnly,)
+    http_method_names = ['get', 'post', 'patch', 'delete']
     filter_backends = (filters.SearchFilter,)
     search_fields = ('name',)
     lookup_field = 'slug'
+
+    def retrieve(self, request, *args, **kwargs):
+        return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
+
+    def update(self, request, *args, **kwargs):
+        return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
 
 class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.all()
     serializer_class = TitleSerializer
-    filter_class = TitleFilter
+    permission_classes = (IsSuperUserOrReadOnly,)
+    pagination_class = LimitOffsetPagination
+    filter_backends = (DjangoFilterBackend,)
+    filterset_class = TitleFilter
+    http_method_names = ['get', 'post', 'patch', 'delete']
 
     def get_serializer_class(self):
-        if self.request.method in ('POST', 'PATCH',):
-            return TitleCreateSerializer
-        return TitleSerializer
+        if self.request.method in ('GET',):
+            return TitleSerializer
+        return TitleCreateSerializer
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
