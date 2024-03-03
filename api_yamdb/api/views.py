@@ -5,14 +5,20 @@ from django.shortcuts import get_object_or_404
 from rest_framework import viewsets, status, generics
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAdminUser
+from rest_framework.permissions import (
+    IsAuthenticatedOrReadOnly, IsAuthenticated
+)
 from django.contrib.auth.tokens import default_token_generator
 from rest_framework_simplejwt.tokens import AccessToken
 from rest_framework.response import Response
 from rest_framework.pagination import LimitOffsetPagination
 from django_filters.rest_framework import DjangoFilterBackend
 from .permissions import IsOwnerOrReadOnly, IsSuperUserOrReadOnly
+from rest_framework.decorators import action
+from rest_framework.pagination import PageNumberPagination
 
 from .permissions import IsSuperUserOrOwnerOrReadOnly
+from .permissions import IsOwnerOrReadOnly, IsSuperUser
 from .filters import TitleFilter
 
 from .viewsets import CreateListDestroyViewSet
@@ -23,15 +29,39 @@ from .serializers import (CategorySerializer,
                           TitleCreateSerializer,
                           ReviewSerializer,
                           CommentSerializer,
-                          CustomUserSerializer,
                           SignUpSerializer,
-                          TokenSerializer)
+                          TokenSerializer,
+                          CustomUserSerializer,
+                          CustomUserUpdateSerializer)
 
 
 class CustomUserViewSet(viewsets.ModelViewSet):
     queryset = CustomUser.objects.all()
     serializer_class = CustomUserSerializer
-    permission_classes = (IsAdminUser,)
+    http_method_names = ['get', 'post', 'patch', 'delete']
+    lookup_field = 'username'
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ('username',)
+    permission_classes = (IsAuthenticated, IsSuperUser)
+    pagination_class = PageNumberPagination  # Недонастроил до конца,
+    # не могу выкупить, как можно получить параметр count из пагинатора
+
+    @action(
+        methods=['get', 'patch', ], detail=False,
+        url_path='me', url_name='me',
+        permission_classes=(IsAuthenticated,),
+    )
+    def owner_profile(self, request):
+        user = request.user
+        if request.method == 'PATCH':
+            serializer = CustomUserUpdateSerializer(
+                user, data=request.data, partial=True
+            )
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+        else:
+            serializer = self.get_serializer(user)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class GenreViewSet(viewsets.ModelViewSet):
@@ -154,14 +184,12 @@ class GetToken(generics.CreateAPIView):
         if serializer.is_valid():
             username = serializer.validated_data.get('username')
             user = get_object_or_404(CustomUser, username=username)
+            token = AccessToken.for_user(user)
+            token['payload'] = user.role
 
             return Response(
-                {'token': str(AccessToken.for_user(user))},
+                {'token': str(token)},
                 status=status.HTTP_200_OK
             )
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-class MeViewSet(viewsets.ModelViewSet):
-    ...

@@ -1,10 +1,11 @@
 from rest_framework import serializers
 from django.utils import timezone
 from django.db.models import Avg
-from django.core.validators import RegexValidator
 from rest_framework import serializers
 
 from reviews.models import Title, Review, Genre, Category, Comment, CustomUser
+from reviews.models import Genre, Category, Title, Review, Comment, CustomUser
+from reviews.utils import validate_name, validate_email
 
 
 class GenreSerializer(serializers.ModelSerializer):
@@ -97,35 +98,41 @@ class CommentSerializer(serializers.ModelSerializer):
 
 
 class CustomUserSerializer(serializers.ModelSerializer):
-    validators = [
-        RegexValidator(
-            regex=r'^[\w.@+-]+$',
-            message='Введите корректное имя пользователя',
-            code='invalid_username'
-        )
-    ]
 
     class Meta:
+
         model = CustomUser
-        fields = [
-            'username', 'email', 'first_name', 'last_name', 'bio', 'role'
-        ]
+        fields = ('username', 'email', 'first_name',
+                  'last_name', 'bio', 'role',)
+        read_only_fields = (
+            'id', 'password', 'last_login', 'is_superuser', 'is_staff',
+            'is_active', 'date_joined', 'confirmation_code',
+            'groups', 'user_permissions'
+        )
+
+
+class CustomUserUpdateSerializer(serializers.ModelSerializer):
+
+    class Meta:
+
+        model = CustomUser
+        fields = ('first_name', 'last_name', 'bio', 'username', 'email',)
+        read_only_fields = (
+            'id', 'password', 'last_login', 'is_superuser', 'is_staff',
+            'is_active', 'date_joined', 'role', 'confirmation_code',
+            'is_email_confirmed', 'confirmation_code_created_at',
+            'groups', 'user_permissions'
+        )
 
     def validate_username(self, value):
-        if value.lower() == 'me':
-            raise serializers.ValidationError(
-                'Нельзя использовать "me" в качестве имени пользователя'
-            )
+        """Validate the username field."""
+        validate_name(value)
         return value
 
-    def validate_user_role_choice(self, data):
-        user = self.context['request'].user
-
-        if user.is_staff:
-            return data
-
-        data['role'] = 'user'
-        return data
+    def validate_email(self, value):
+        """Validate the email field."""
+        validate_email(value)
+        return value
 
 
 class SignUpSerializer(serializers.ModelSerializer):
@@ -157,18 +164,13 @@ class TokenSerializer(serializers.ModelSerializer):
 
         try:
             user = CustomUser.objects.get(username=username)
+            if user.confirmation_code != confirmation_code:
+                raise serializers.ValidationError('Неверный код подтверждения')
         except CustomUser.DoesNotExist:
             serializers.ValidationError('Пользователь не существует')
-
-        if user.confirmation_code != confirmation_code:
-            raise serializers.ValidationError('Неверный код подтверждения')
 
         return data
 
     class Meta:
         model = CustomUser
         fields = ('username', 'confirmation_code')
-
-
-class MeSerializer(serializers.ModelSerializer):
-    ...  # Изменение данных своего профиля
