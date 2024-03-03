@@ -2,13 +2,14 @@ from rest_framework import filters
 from django.core.mail import send_mail
 from django.shortcuts import get_object_or_404
 from rest_framework import viewsets, status, generics
-from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAdminUser, IsAuthenticated
+from rest_framework.permissions import (
+    IsAuthenticatedOrReadOnly, IsAuthenticated
+)
 from django.contrib.auth.tokens import default_token_generator
 from rest_framework_simplejwt.tokens import AccessToken
-from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.decorators import action
-from rest_framework import serializers
+from rest_framework.pagination import PageNumberPagination
 
 from .permissions import IsOwnerOrReadOnly
 from .filters import TitleFilter
@@ -20,23 +21,39 @@ from .serializers import (CategorySerializer,
                           TitleCreateSerializer,
                           ReviewSerializer,
                           CommentSerializer,
-                          CustomUserSerializer,
                           SignUpSerializer,
                           TokenSerializer,
-                          MeSerializer,)
+                          CustomUserSerializer,
+                          CustomUserUpdateSerializer)
 
 
 class CustomUserViewSet(viewsets.ModelViewSet):
     queryset = CustomUser.objects.all()
     serializer_class = CustomUserSerializer
-    http_method_names = ['get', 'post', 'head', 'patch', 'delete']
+    http_method_names = ['get', 'post', 'patch', 'delete']
+    lookup_field = 'username'
     filter_backends = (filters.SearchFilter,)
     search_fields = ('username',)
-    permission_classes = (
-        IsAuthenticated,
-        # IsRequiredScopes
+    permission_classes = (IsAuthenticated,)
+    pagination_class = PageNumberPagination  # Недонастроил до конца,
+    # не могу выкупить, как можно получить параметр count из пагинатора
+
+    @action(
+        methods=['get', 'patch', ], detail=False,
+        url_path='me', url_name='me',
+        permission_classes=(IsAuthenticated,),
     )
-    # required_scopes = ['См. Redoc']
+    def owner_profile(self, request):
+        user = request.user
+        if request.method == 'PATCH':
+            serializer = CustomUserUpdateSerializer(
+                user, data=request.data, partial=True
+            )
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+        else:
+            serializer = self.get_serializer(user)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class GenreViewSet(CreateListDestroyViewSet):
@@ -98,6 +115,33 @@ class CommentViewSet(viewsets.ModelViewSet):
             post=self.get_review())
 
 
+class CustomUserViewSet(viewsets.ModelViewSet):
+    queryset = CustomUser.objects.all()
+    serializer_class = CustomUserSerializer
+    http_method_names = ['get', 'post', 'patch', 'delete']
+    lookup_field = 'username'
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ('username',)
+    permission_classes = (IsAuthenticated,)
+
+    @action(
+        methods=['get', 'patch', ], detail=False,
+        url_path='me', url_name='me',
+        permission_classes=(IsAuthenticated,),
+    )
+    def owner_profile(self, request):
+        user = request.user
+        if request.method == 'PATCH':
+            serializer = CustomUserUpdateSerializer(
+                user, data=request.data, partial=True
+            )
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+        else:
+            serializer = self.get_serializer(user)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
 class SignUp(generics.CreateAPIView):
     def post(self, request):
         serializer = SignUpSerializer(data=request.data)
@@ -142,22 +186,4 @@ class GetToken(generics.CreateAPIView):
                 status=status.HTTP_200_OK
             )
 
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-class MeView(APIView):
-    permission_classes = [IsAuthenticated]
-
-    def get(self, request):
-        serializer = MeSerializer(request.user)
-        return Response(serializer.data)
-
-    def patch(self, request):
-        if request.user.role == 'user':
-            serializer = MeSerializer(
-                request.user, data=request.data, partial=True
-            )
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
