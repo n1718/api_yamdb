@@ -115,33 +115,6 @@ class CommentViewSet(viewsets.ModelViewSet):
             post=self.get_review())
 
 
-class CustomUserViewSet(viewsets.ModelViewSet):
-    queryset = CustomUser.objects.all()
-    serializer_class = CustomUserSerializer
-    http_method_names = ['get', 'post', 'patch', 'delete']
-    lookup_field = 'username'
-    filter_backends = (filters.SearchFilter,)
-    search_fields = ('username',)
-    permission_classes = (IsAuthenticated,)
-
-    @action(
-        methods=['get', 'patch', ], detail=False,
-        url_path='me', url_name='me',
-        permission_classes=(IsAuthenticated,),
-    )
-    def owner_profile(self, request):
-        user = request.user
-        if request.method == 'PATCH':
-            serializer = CustomUserUpdateSerializer(
-                user, data=request.data, partial=True
-            )
-            serializer.is_valid(raise_exception=True)
-            serializer.save()
-        else:
-            serializer = self.get_serializer(user)
-        return Response(serializer.data, status=status.HTTP_200_OK)
-
-
 class SignUp(generics.CreateAPIView):
     def post(self, request):
         serializer = SignUpSerializer(data=request.data)
