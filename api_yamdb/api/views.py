@@ -11,7 +11,7 @@ from rest_framework.response import Response
 from rest_framework.decorators import action
 from rest_framework.pagination import PageNumberPagination
 
-from .permissions import IsOwnerOrReadOnly
+from .permissions import IsOwnerOrReadOnly, IsSuperUser
 from .filters import TitleFilter
 from .viewsets import CreateListDestroyViewSet
 from review.models import Category, Genre, Title, Review, CustomUser
@@ -34,7 +34,7 @@ class CustomUserViewSet(viewsets.ModelViewSet):
     lookup_field = 'username'
     filter_backends = (filters.SearchFilter,)
     search_fields = ('username',)
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, IsSuperUser)
     pagination_class = PageNumberPagination  # Недонастроил до конца,
     # не могу выкупить, как можно получить параметр count из пагинатора
 
