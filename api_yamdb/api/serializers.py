@@ -1,7 +1,5 @@
 from django.db.models import Avg
 from django.utils import timezone
-from django.contrib.auth.validators import UnicodeUsernameValidator
-from django.core.validators import MaxLengthValidator
 from rest_framework import serializers
 
 from reviews.models import Category, Comment, CustomUser, Genre, Review, Title
@@ -115,7 +113,8 @@ class CustomUserUpdateSerializer(serializers.ModelSerializer):
     class Meta:
 
         model = CustomUser
-        fields = ('first_name', 'last_name', 'bio', 'username', 'email',)
+        fields = ('first_name', 'last_name', 'bio', 'username', 'email')
+        read_only_fields = ('role',)
 
 
 class SignUpSerializer(serializers.ModelSerializer):
