@@ -25,9 +25,9 @@ class CustomUser(AbstractUser):
         verbose_name='Имя пользователя',
     )
     email = models.EmailField(
-        unique=True, blank=False, verbose_name='Эл. почта'
+        unique=True, verbose_name='Эл. почта'
     )
-    bio = models.TextField(null=True, blank=True, verbose_name='Биография')
+    bio = models.TextField(blank=True, verbose_name='Биография')
     role = models.CharField(
         choices=UserRole.choices,
         default=UserRole.USER,

@@ -133,21 +133,12 @@ class SignUpSerializer(serializers.ModelSerializer):
 
 
 class TokenSerializer(serializers.Serializer):
-    username = serializers.CharField(
-        validators=[
-            UnicodeUsernameValidator(), MaxLengthValidator(limit_value=150)
-        ]
-    )
+    username = serializers.CharField()
     confirmation_code = serializers.CharField()
 
     def validate(self, data):
         username = data.get('username')
         confirmation_code = data.get('confirmation_code')
-
-        if not username or not confirmation_code:
-            raise serializers.ValidationError(
-                'Обязательные для валидации поля отсутствуют'
-            )
 
         try:
             user = CustomUser.objects.get(username=username)
