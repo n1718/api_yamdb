@@ -127,19 +127,13 @@ SIMPLE_JWT = {
     'SIGNING_KEY': SECRET_KEY
 }
 
-# AUTHENTICATION_BACKENDS = [
-#     'django.contrib.auth.backends.ModelBackend',
-#     'rest_framework_simplejwt.backends.TokenBackend',
-# ]
-
-
-# User
 
 AUTH_USER_MODEL = 'reviews.CustomUser'
 
 
-# EMAIL
-
 EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
 
 EMAIL_FILE_PATH = BASE_DIR / 'sent_mails'
+
+REVIEW_SCORE_MIN_VALUE = 1
+REVIEW_SCORE_MAX_VALUE = 10

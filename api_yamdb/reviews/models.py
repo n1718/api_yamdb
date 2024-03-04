@@ -3,6 +3,7 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 
 from .validators import validate_year
+from api_yamdb import settings
 
 ROLE_CHOICES = [
     ('user', 'User'),
@@ -100,11 +101,11 @@ class Review(models.Model):
     score = models.PositiveSmallIntegerField(
         validators=[
             MinValueValidator(
-                1,
+                settings.REVIEW_SCORE_MIN_VALUE,
                 message='Оценка имеет границы от 1 до 10'
             ),
             MaxValueValidator(
-                10,
+                settings.REVIEW_SCORE_MAX_VALUE,
                 message='Оценка имеет границы от 1 до 10'
             ),
         ]
@@ -122,6 +123,8 @@ class Review(models.Model):
             ),
         ]
         ordering = ('pub_date',)
+        verbose_name = 'Review'
+        verbose_name_plural = 'Reviews'
 
 
 class Comment(models.Model):
@@ -133,10 +136,12 @@ class Comment(models.Model):
     review = models.ForeignKey(
         Review,
         on_delete=models.CASCADE,
-        null=False,
-        blank=False,
         related_name='comments'
     )
+
+    class Meta:
+        verbose_name = 'Review'
+        verbose_name_plural = 'Reviews'
 
 
 class GenreTitle(models.Model):

@@ -69,9 +69,8 @@ class ReviewSerializer(serializers.ModelSerializer):
     )
 
     class Meta:
-        fields = ('id', 'author', 'text', 'score', 'pub_date', 'title')
+        fields = ('id', 'author', 'text', 'score', 'pub_date')
         model = Review
-        read_only_fields = ('title',)
 
     def validate(self, data):
         if not self.context.get('request').method == 'POST':
@@ -93,7 +92,6 @@ class CommentSerializer(serializers.ModelSerializer):
     class Meta:
         fields = ('id', 'author', 'text', 'pub_date')
         model = Comment
-        read_only_fields = ('pub_date',)
 
 
 class CustomUserSerializer(serializers.ModelSerializer):
