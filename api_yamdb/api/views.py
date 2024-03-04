@@ -35,8 +35,7 @@ class CustomUserViewSet(viewsets.ModelViewSet):
     filter_backends = (filters.SearchFilter,)
     search_fields = ('username',)
     permission_classes = (IsAuthenticated, IsSuperUser)
-    pagination_class = PageNumberPagination  # Недонастроил до конца,
-    # не могу выкупить, как можно получить параметр count из пагинатора
+    pagination_class = PageNumberPagination
 
     @action(
         methods=['get', 'patch', ], detail=False,

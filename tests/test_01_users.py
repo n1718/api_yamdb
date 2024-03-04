@@ -555,11 +555,14 @@ class Test01UserAPI:
         )
 
         current_role = user.role
+        print(current_role)
         data = {
             'role': 'admin'
         }
         response = user_client.patch(f'{self.USERS_ME_URL}', data=data)
+        print(response.json())
         user = django_user_model.objects.filter(username=user.username).first()
+        print(user.role)
         assert user.role == current_role, (
             f'Проверьте, что PATCH-запрос к `{self.USERS_ME_URL}` с ключом '
             '`role` не изменяет роль пользователя.'
