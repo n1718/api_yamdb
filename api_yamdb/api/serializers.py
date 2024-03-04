@@ -1,10 +1,10 @@
 from django.db.models import Avg
 from django.utils import timezone
+from django.contrib.auth.validators import UnicodeUsernameValidator
+from django.core.validators import MaxLengthValidator
 from rest_framework import serializers
 
 from reviews.models import Category, Comment, CustomUser, Genre, Review, Title
-
-from .utils import validate_email, validate_name
 
 
 class GenreSerializer(serializers.ModelSerializer):
@@ -116,22 +116,6 @@ class CustomUserUpdateSerializer(serializers.ModelSerializer):
 
         model = CustomUser
         fields = ('first_name', 'last_name', 'bio', 'username', 'email',)
-        read_only_fields = (
-            'id', 'password', 'last_login', 'is_superuser', 'is_staff',
-            'is_active', 'date_joined', 'role', 'confirmation_code',
-            'is_email_confirmed', 'confirmation_code_created_at',
-            'groups', 'user_permissions'
-        )
-
-    def validate_username(self, value):
-        """Validate the username field."""
-        validate_name(value)
-        return value
-
-    def validate_email(self, value):
-        """Validate the email field."""
-        validate_email(value)
-        return value
 
 
 class SignUpSerializer(serializers.ModelSerializer):
@@ -148,8 +132,12 @@ class SignUpSerializer(serializers.ModelSerializer):
         return value
 
 
-class TokenSerializer(serializers.ModelSerializer):
-    username = serializers.CharField()
+class TokenSerializer(serializers.Serializer):
+    username = serializers.CharField(
+        validators=[
+            UnicodeUsernameValidator(), MaxLengthValidator(limit_value=150)
+        ]
+    )
     confirmation_code = serializers.CharField()
 
     def validate(self, data):

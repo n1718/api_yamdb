@@ -107,7 +107,7 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = ((BASE_DIR / 'static/'),)
 
 
-# Authentification
+# Auth
 
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
@@ -126,11 +126,6 @@ SIMPLE_JWT = {
     'AUTH_HEADER_TYPES': ('Bearer',),
     'SIGNING_KEY': SECRET_KEY
 }
-
-# AUTHENTICATION_BACKENDS = [
-#     'django.contrib.auth.backends.ModelBackend',
-#     'rest_framework_simplejwt.backends.TokenBackend',
-# ]
 
 
 # User

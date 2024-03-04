@@ -1,23 +1,53 @@
 from django.contrib.auth.models import AbstractUser
-from django.core.validators import MaxValueValidator, MinValueValidator
+from django.core.validators import (
+    MaxValueValidator, MinValueValidator, RegexValidator
+)
+from django.contrib.auth.validators import UnicodeUsernameValidator
 from django.db import models
-
 from .validators import validate_year
-
-ROLE_CHOICES = [
-    ('user', 'User'),
-    ('moderator', 'Moderator'),
-    ('admin', 'Admin'),
-]
 
 
 class CustomUser(AbstractUser):
-    email = models.EmailField(unique=True, max_length=254, blank=False,)
-    bio = models.TextField(null=True, blank=True)
-    role = models.CharField(
-        default='user', choices=ROLE_CHOICES, max_length=150
+    class UserRole(models.TextChoices):
+        USER = 'user'
+        MODERATOR = 'moderator'
+        ADMIN = 'admin'
+
+    username = models.CharField(
+        max_length=150,
+        unique=True,
+        validators=[
+            UnicodeUsernameValidator(),
+            RegexValidator(regex=r'^[\w.@+-]+\Z')
+        ],
+        null=False,
+        blank=False,
+        verbose_name='Имя пользователя',
     )
-    confirmation_code = models.CharField(max_length=150)
+    email = models.EmailField(
+        unique=True, blank=False, verbose_name='Эл. почта'
+    )
+    bio = models.TextField(null=True, blank=True, verbose_name='Биография')
+    role = models.CharField(
+        choices=UserRole.choices,
+        default=UserRole.USER,
+        max_length=150,
+        verbose_name='Роль'
+    )
+    confirmation_code = models.CharField(
+        max_length=150,
+        null=False,
+        blank=False,
+        verbose_name='Код подтверждения'
+    )
+
+    class Meta:
+        verbose_name = 'Пользователь'
+        verbose_name_plural = 'Пользователи'
+        ordering = ['id']
+    
+    def __str__(self):
+        return self.username
 
 
 class Category(models.Model):
