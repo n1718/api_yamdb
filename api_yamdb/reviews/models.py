@@ -5,7 +5,7 @@ from django.core.validators import (
 from django.contrib.auth.validators import UnicodeUsernameValidator
 from django.db import models
 from .validators import validate_year, validate_username
-from api_yamdb.settings import USER_MAX_LENGTH
+from api_yamdb import settings
 
 
 class CustomUser(AbstractUser):
@@ -15,7 +15,7 @@ class CustomUser(AbstractUser):
         ADMIN = 'admin'
 
     username = models.CharField(
-        max_length=USER_MAX_LENGTH,
+        max_length=settings.USER_MAX_LENGTH,
         unique=True,
         validators=[
             UnicodeUsernameValidator(),
@@ -33,11 +33,11 @@ class CustomUser(AbstractUser):
     role = models.CharField(
         choices=UserRole.choices,
         default=UserRole.USER,
-        max_length=USER_MAX_LENGTH,
+        max_length=settings.USER_MAX_LENGTH,
         verbose_name='Роль'
     )
     confirmation_code = models.CharField(
-        max_length=USER_MAX_LENGTH,
+        max_length=settings.USER_MAX_LENGTH,
         null=False,
         blank=False,
         verbose_name='Код подтверждения'
