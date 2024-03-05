@@ -135,5 +135,10 @@ EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
 
 EMAIL_FILE_PATH = BASE_DIR / 'sent_mails'
 
+# CONSTANTS
+
 REVIEW_SCORE_MIN_VALUE = 1
 REVIEW_SCORE_MAX_VALUE = 10
+
+MAX_LENGTH_NAME = 256
+MAX_LENGTH_SLUG = 50
