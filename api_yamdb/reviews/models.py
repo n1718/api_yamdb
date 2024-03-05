@@ -1,24 +1,55 @@
 from django.contrib.auth.models import AbstractUser
-from django.core.validators import MaxValueValidator, MinValueValidator
+from django.core.validators import (
+    MaxValueValidator, MinValueValidator, RegexValidator
+)
+from django.contrib.auth.validators import UnicodeUsernameValidator
 from django.db import models
-
-from .validators import validate_year
+from .validators import validate_year, validate_username
 from api_yamdb import settings
-
-ROLE_CHOICES = [
-    ('user', 'User'),
-    ('moderator', 'Moderator'),
-    ('admin', 'Admin'),
-]
 
 
 class CustomUser(AbstractUser):
-    email = models.EmailField(unique=True, max_length=254, blank=False,)
-    bio = models.TextField(null=True, blank=True)
-    role = models.CharField(
-        default='user', choices=ROLE_CHOICES, max_length=150
+    class UserRole(models.TextChoices):
+        USER = 'user'
+        MODERATOR = 'moderator'
+        ADMIN = 'admin'
+
+    username = models.CharField(
+        max_length=settings.USER_MAX_LENGTH,
+        unique=True,
+        validators=[
+            UnicodeUsernameValidator(),
+            RegexValidator(regex=r'^[\w.@+-]+\Z'),
+            validate_username
+        ],
+        null=False,
+        blank=False,
+        verbose_name='Имя пользователя',
     )
-    confirmation_code = models.CharField(max_length=150)
+    email = models.EmailField(
+        unique=True, verbose_name='Эл. почта'
+    )
+    bio = models.TextField(blank=True, verbose_name='Биография')
+    role = models.CharField(
+        choices=UserRole.choices,
+        default=UserRole.USER,
+        max_length=settings.USER_MAX_LENGTH,
+        verbose_name='Роль'
+    )
+    confirmation_code = models.CharField(
+        max_length=settings.USER_MAX_LENGTH,
+        null=False,
+        blank=False,
+        verbose_name='Код подтверждения'
+    )
+
+    class Meta:
+        verbose_name = 'Пользователь'
+        verbose_name_plural = 'Пользователи'
+        ordering = ['id']
+
+    def __str__(self):
+        return self.username
 
 
 class Category(models.Model):
@@ -54,6 +85,9 @@ class Genre(models.Model):
         unique=True,
         verbose_name='Слаг жанра'
     )
+
+    def __str__(self) -> str:
+        return self.name
 
     class Meta:
         verbose_name = 'Жанр'
@@ -135,6 +169,8 @@ class Comment(models.Model):
     review = models.ForeignKey(
         Review,
         on_delete=models.CASCADE,
+        null=False,
+        blank=False,
         related_name='comments'
     )
 

@@ -2,8 +2,6 @@ from rest_framework import serializers
 
 from reviews.models import Category, Comment, CustomUser, Genre, Review, Title
 
-from .utils import validate_email, validate_name
-
 
 class GenreSerializer(serializers.ModelSerializer):
 
@@ -105,23 +103,8 @@ class CustomUserUpdateSerializer(serializers.ModelSerializer):
     class Meta:
 
         model = CustomUser
-        fields = ('first_name', 'last_name', 'bio', 'username', 'email',)
-        read_only_fields = (
-            'id', 'password', 'last_login', 'is_superuser', 'is_staff',
-            'is_active', 'date_joined', 'role', 'confirmation_code',
-            'is_email_confirmed', 'confirmation_code_created_at',
-            'groups', 'user_permissions'
-        )
-
-    def validate_username(self, value):
-        """Validate the username field."""
-        validate_name(value)
-        return value
-
-    def validate_email(self, value):
-        """Validate the email field."""
-        validate_email(value)
-        return value
+        fields = ('first_name', 'last_name', 'bio', 'username', 'email')
+        read_only_fields = ('role',)
 
 
 class SignUpSerializer(serializers.ModelSerializer):
@@ -138,18 +121,13 @@ class SignUpSerializer(serializers.ModelSerializer):
         return value
 
 
-class TokenSerializer(serializers.ModelSerializer):
+class TokenSerializer(serializers.Serializer):
     username = serializers.CharField()
     confirmation_code = serializers.CharField()
 
     def validate(self, data):
         username = data.get('username')
         confirmation_code = data.get('confirmation_code')
-
-        if not username or not confirmation_code:
-            raise serializers.ValidationError(
-                'Обязательные для валидации поля отсутствуют'
-            )
 
         try:
             user = CustomUser.objects.get(username=username)

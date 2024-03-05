@@ -128,6 +128,8 @@ SIMPLE_JWT = {
 }
 
 
+# User
+
 AUTH_USER_MODEL = 'reviews.CustomUser'
 
 
@@ -135,7 +137,10 @@ EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
 
 EMAIL_FILE_PATH = BASE_DIR / 'sent_mails'
 
+
 # CONSTANTS
+
+USER_MAX_LENGTH = 150
 
 REVIEW_SCORE_MIN_VALUE = 1
 REVIEW_SCORE_MAX_VALUE = 10

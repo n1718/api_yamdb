@@ -128,8 +128,6 @@ class SignUp(generics.CreateAPIView):
                 username=username, email=email
             )
             confirmation_code = default_token_generator.make_token(user)
-            user.confirmation_code = confirmation_code
-            user.save()
 
             send_mail(
                 'Код подтверждения',
@@ -147,15 +145,12 @@ class SignUp(generics.CreateAPIView):
 class GetToken(generics.CreateAPIView):
     def post(self, request):
         serializer = TokenSerializer(data=request.data)
-        if serializer.is_valid():
+        if serializer.is_valid(raise_exception=True):
             username = serializer.validated_data.get('username')
             user = get_object_or_404(CustomUser, username=username)
             token = AccessToken.for_user(user)
-            token['payload'] = user.role
 
             return Response(
                 {'token': str(token)},
                 status=status.HTTP_200_OK
             )
-
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
