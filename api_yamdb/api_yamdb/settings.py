@@ -143,3 +143,9 @@ AUTH_USER_MODEL = 'reviews.CustomUser'
 EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
 
 EMAIL_FILE_PATH = BASE_DIR / 'sent_mails'
+
+
+# CONSTANTS
+
+MAX_LENGTH_NAME = 256
+MAX_LENGTH_SLUG = 50

@@ -1,5 +1,3 @@
-from django.db.models import Avg
-from django.utils import timezone
 from rest_framework import serializers
 
 from reviews.models import Category, Comment, CustomUser, Genre, Review, Title
@@ -22,14 +20,9 @@ class CategorySerializer(serializers.ModelSerializer):
 
 
 class TitleSerializer(serializers.ModelSerializer):
-
     genre = GenreSerializer(many=True, read_only=True)
     category = CategorySerializer(read_only=True)
-    rating = serializers.SerializerMethodField()
-
-    def get_rating(self, obj):
-        rating = obj.reviews.aggregate(Avg('score')).get('score__avg')
-        return rating if not rating else round(rating, 0)
+    rating = serializers.IntegerField(default=None)
 
     class Meta:
         fields = (
@@ -46,21 +39,19 @@ class TitleCreateSerializer(serializers.ModelSerializer):
     genre = serializers.SlugRelatedField(
         slug_field='slug',
         queryset=Genre.objects.all(),
-        many=True
+        many=True,
+        allow_null=True,
+        allow_empty=True
+
     )
 
     class Meta:
-        fields = (
-            'id', 'name', 'year', 'description', 'genre', 'category')
+        fields = '__all__'
         model = Title
 
-        def validate_year(self, value):
-            year_now = timezone.now.year
-            if value <= 0 or value > year_now:
-                raise serializers.ValidationError(
-                    'Год создания должен быть нашей эры и не больше текущего.'
-                )
-            return value
+        def to_representation(self, value):
+            serializer = TitleSerializer(value)
+            return serializer.data
 
 
 class ReviewSerializer(serializers.ModelSerializer):
