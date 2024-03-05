@@ -22,8 +22,6 @@ class CustomUser(AbstractUser):
             RegexValidator(regex=r'^[\w.@+-]+\Z'),
             validate_username
         ],
-        null=False,
-        blank=False,
         verbose_name='Имя пользователя',
     )
     email = models.EmailField(
@@ -69,8 +67,9 @@ class Category(models.Model):
         return self.name
 
     class Meta:
-        verbose_name = 'категория'
+        verbose_name = 'Категория'
         verbose_name_plural = 'Категории'
+        ordering = ['name']
 
 
 class Genre(models.Model):
@@ -86,12 +85,10 @@ class Genre(models.Model):
         verbose_name='Слаг жанра'
     )
 
-    def __str__(self) -> str:
-        return self.name
-
     class Meta:
         verbose_name = 'Жанр'
         verbose_name_plural = 'Жанры'
+        ordering = ['name']
 
     def __str__(self) -> str:
         return self.name
@@ -126,6 +123,14 @@ class Title(models.Model):
         verbose_name='Категория',
     )
 
+    class Meta:
+        verbose_name = 'Произведение'
+        verbose_name_plural = 'Произведения'
+        ordering = ['year']
+
+    def __str__(self) -> str:
+        return self.name
+
 
 class Review(models.Model):
     text = models.TextField()
@@ -155,9 +160,12 @@ class Review(models.Model):
                 name='unique_pair'
             ),
         ]
-        ordering = ('pub_date',)
-        verbose_name = 'Review'
-        verbose_name_plural = 'Reviews'
+        verbose_name = 'Отзыв'
+        verbose_name_plural = 'Отзывы'
+        ordering = ['pub_date']
+
+    def __str__(self):
+        return self.score
 
 
 class Comment(models.Model):
@@ -175,8 +183,12 @@ class Comment(models.Model):
     )
 
     class Meta:
-        verbose_name = 'Review'
-        verbose_name_plural = 'Reviews'
+        verbose_name = 'Комментарий'
+        verbose_name_plural = 'Комментарии'
+        ordering = ['review']
+
+    def __str__(self) -> str:
+        return self.text
 
 
 class GenreTitle(models.Model):
@@ -188,6 +200,3 @@ class GenreTitle(models.Model):
         Genre,
         on_delete=models.CASCADE
     )
-
-    def __str__(self) -> str:
-        return self.genre

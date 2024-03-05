@@ -140,6 +140,8 @@ EMAIL_FILE_PATH = BASE_DIR / 'sent_mails'
 
 # CONSTANTS
 
+EMAIL_SENDER = 'example@email.com'
+
 USER_MAX_LENGTH = 150
 
 REVIEW_SCORE_MIN_VALUE = 1

@@ -116,8 +116,8 @@ class SignUpSerializer(serializers.ModelSerializer):
 
 
 class TokenSerializer(serializers.Serializer):
-    username = serializers.CharField()
-    confirmation_code = serializers.CharField()
+    username = serializers.CharField(required=True)
+    confirmation_code = serializers.CharField(required=True)
 
     def validate(self, data):
         username = data.get('username')

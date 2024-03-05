@@ -22,6 +22,7 @@ from .serializers import (CategorySerializer, CommentSerializer,
                           GenreSerializer, ReviewSerializer, SignUpSerializer,
                           TitleCreateSerializer, TitleSerializer,
                           TokenSerializer)
+from api_yamdb import settings
 
 
 class CustomUserViewSet(viewsets.ModelViewSet):
@@ -132,7 +133,7 @@ class SignUp(generics.CreateAPIView):
             send_mail(
                 'Код подтверждения',
                 f'Ваш код подтверждения: {confirmation_code}',
-                'example@email.com',
+                {settings.EMAIL_SENDER},
                 [email],
                 fail_silently=False,
             )
@@ -147,8 +148,7 @@ class GetToken(generics.CreateAPIView):
         serializer = TokenSerializer(data=request.data)
         if serializer.is_valid(raise_exception=True):
             username = serializer.validated_data.get('username')
-            user = get_object_or_404(CustomUser, username=username)
-            token = AccessToken.for_user(user)
+            token = AccessToken.for_user(get_object_or_404(CustomUser, username=username))
 
             return Response(
                 {'token': str(token)},
