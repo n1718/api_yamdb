@@ -3,7 +3,7 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 
 from .validators import validate_year
-from api_yamdb.settings import MAX_LENGTH_NAME, MAX_LENGTH_SLUG
+from api_yamdb import settings
 
 ROLE_CHOICES = [
     ('user', 'User'),
@@ -25,12 +25,12 @@ class Category(models.Model):
     """Категории произведений."""
 
     name = models.CharField(
-        max_length=MAX_LENGTH_NAME,
+        max_length=settings.MAX_LENGTH_NAME,
         verbose_name='Название категории'
     )
     slug = models.SlugField(
         unique=True,
-        max_length=MAX_LENGTH_SLUG,
+        max_length=settings.MAX_LENGTH_SLUG,
         verbose_name='Слаг категории'
     )
 
@@ -46,11 +46,11 @@ class Genre(models.Model):
     """Жанры произведений."""
 
     name = models.CharField(
-        max_length=MAX_LENGTH_NAME,
+        max_length=settings.MAX_LENGTH_NAME,
         verbose_name='Название категории'
     )
     slug = models.SlugField(
-        max_length=MAX_LENGTH_SLUG,
+        max_length=settings.MAX_LENGTH_SLUG,
         unique=True,
         verbose_name='Слаг жанра'
     )
@@ -67,7 +67,7 @@ class Title(models.Model):
     """Произведения."""
 
     name = models.CharField(
-        max_length=MAX_LENGTH_NAME,
+        max_length=settings.MAX_LENGTH_NAME,
         verbose_name='Название произведения'
     )
     year = models.SmallIntegerField(
