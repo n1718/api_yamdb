@@ -34,17 +34,19 @@ class CustomUser(AbstractUser):
         max_length=settings.USER_MAX_LENGTH,
         verbose_name='Роль'
     )
-    confirmation_code = models.CharField(
-        max_length=settings.USER_MAX_LENGTH,
-        null=False,
-        blank=False,
-        verbose_name='Код подтверждения'
-    )
 
     class Meta:
         verbose_name = 'Пользователь'
         verbose_name_plural = 'Пользователи'
         ordering = ['id']
+
+    @property  # Проперти позволит нам обеспечить доступ к методу, как к атрибуту: user.is_admin вместо user.is_admin()
+    def is_admin(self):
+        return self.is_superuser or self.role == self.UserRole.ADMIN
+
+    @property
+    def is_moderator(self):
+        return self.is_staff or self.role == self.UserRole.MODERATOR
 
     def __str__(self):
         return self.username

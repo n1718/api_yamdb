@@ -103,7 +103,9 @@ class CommentViewSet(viewsets.ModelViewSet):
     filter_backends = (DjangoFilterBackend,)
 
     def get_review(self):
-        return get_object_or_404(Review, id=self.kwargs['review_id'], title=self.kwargs['title_id'])
+        return get_object_or_404(
+            Review, id=self.kwargs['review_id'], title=self.kwargs['title_id']
+        )
 
     def get_queryset(self):
         return self.get_review().comments.all()
@@ -144,13 +146,28 @@ class SignUp(generics.CreateAPIView):
 
 
 class GetToken(generics.CreateAPIView):
+    def get_user(self, username):
+        return get_object_or_404(CustomUser, username=username)
+
     def post(self, request):
         serializer = TokenSerializer(data=request.data)
         if serializer.is_valid(raise_exception=True):
             username = serializer.validated_data.get('username')
-            token = AccessToken.for_user(get_object_or_404(CustomUser, username=username))
 
-            return Response(
-                {'token': str(token)},
-                status=status.HTTP_200_OK
-            )
+            if default_token_generator.check_token(
+                self.get_user(username),
+                serializer.validated_data.get('confirmation_code')
+            ):
+                token = AccessToken.for_user(
+                    self.get_user(username)
+                )
+
+                return Response(
+                    {'token': str(token)},
+                    status=status.HTTP_200_OK
+                )
+
+            else:
+                return Response(
+                    serializer.errors, status=status.HTTP_400_BAD_REQUEST
+                )

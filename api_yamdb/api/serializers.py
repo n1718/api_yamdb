@@ -1,3 +1,5 @@
+from django.contrib.auth.validators import UnicodeUsernameValidator
+
 from rest_framework import serializers
 
 from reviews.models import Category, Comment, CustomUser, Genre, Review, Title
@@ -97,7 +99,9 @@ class CustomUserUpdateSerializer(serializers.ModelSerializer):
     class Meta:
 
         model = CustomUser
-        fields = ('first_name', 'last_name', 'bio', 'username', 'email', 'role')
+        fields = (
+            'first_name', 'last_name', 'bio', 'username', 'email', 'role'
+        )
         read_only_fields = ('role',)
 
 
@@ -116,21 +120,13 @@ class SignUpSerializer(serializers.ModelSerializer):
 
 
 class TokenSerializer(serializers.Serializer):
-    username = serializers.CharField(required=True)
-    confirmation_code = serializers.CharField(required=True)
-
-    def validate(self, data):
-        username = data.get('username')
-        confirmation_code = data.get('confirmation_code')
-
-        try:
-            user = CustomUser.objects.get(username=username)
-            if user.confirmation_code != confirmation_code:
-                raise serializers.ValidationError('Неверный код подтверждения')
-        except CustomUser.DoesNotExist:
-            serializers.ValidationError('Пользователь не существует')
-
-        return data
+    username = serializers.CharField(
+        required=True,
+        max_length=150,
+        validators=[
+            UnicodeUsernameValidator(),
+        ]
+    )
 
     class Meta:
         model = CustomUser
