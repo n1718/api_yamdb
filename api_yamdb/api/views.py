@@ -11,7 +11,7 @@ from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import AccessToken
 from django.db.models import Avg
 
-from api.viewsets import CreateListDestroyViewSet
+from .viewsets import CreateListDestroyViewSet
 from reviews.models import Category, CustomUser, Genre, Review, Title
 
 from .filters import TitleFilter
