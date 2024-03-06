@@ -127,6 +127,7 @@ class TokenSerializer(serializers.Serializer):
             UnicodeUsernameValidator(),
         ]
     )
+    confirmation_code = serializers.CharField(required=True)
 
     class Meta:
         model = CustomUser
