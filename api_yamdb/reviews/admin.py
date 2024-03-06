@@ -5,10 +5,8 @@ from .models import (
     Genre,
     Title,
     Review,
-    Comment,
-    GenreTitle
+    Comment
 )
-
 
 
 admin.site.register(CustomUser)

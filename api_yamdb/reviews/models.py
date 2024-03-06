@@ -40,7 +40,7 @@ class CustomUser(AbstractUser):
         verbose_name_plural = 'Пользователи'
         ordering = ['id']
 
-    @property  # Проперти позволит нам обеспечить доступ к методу, как к атрибуту: user.is_admin вместо user.is_admin()
+    @property
     def is_admin(self):
         return self.is_superuser or self.role == self.UserRole.ADMIN
 
