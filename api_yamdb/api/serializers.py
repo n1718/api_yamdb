@@ -100,7 +100,7 @@ class CustomUserUpdateSerializer(serializers.ModelSerializer):
 
         model = CustomUser
         fields = (
-            'first_name', 'last_name', 'bio', 'username', 'email', 'role'
+            'username', 'email', 'first_name', 'last_name', 'bio', 'role'
         )
         read_only_fields = ('role',)
 
