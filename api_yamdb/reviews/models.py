@@ -66,7 +66,7 @@ class Category(models.Model):
     )
 
     def __str__(self) -> str:
-        return self.name
+        return self.slug
 
     class Meta:
         verbose_name = 'Категория'
@@ -93,7 +93,7 @@ class Genre(models.Model):
         ordering = ['name']
 
     def __str__(self) -> str:
-        return self.name
+        return self.slug
 
 
 class Title(models.Model):

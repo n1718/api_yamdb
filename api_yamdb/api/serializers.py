@@ -22,7 +22,7 @@ class CategorySerializer(serializers.ModelSerializer):
 class TitleSerializer(serializers.ModelSerializer):
     genre = GenreSerializer(many=True, read_only=True)
     category = CategorySerializer(read_only=True)
-    rating = serializers.IntegerField(default=None)
+    rating = serializers.FloatField(default=None, read_only=True)
 
     class Meta:
         fields = (
@@ -31,17 +31,17 @@ class TitleSerializer(serializers.ModelSerializer):
 
 
 class TitleCreateSerializer(serializers.ModelSerializer):
-
     category = serializers.SlugRelatedField(
         slug_field='slug',
-        queryset=Category.objects.all()
+        queryset=Category.objects.all(),
+        allow_null=False
     )
     genre = serializers.SlugRelatedField(
         slug_field='slug',
         queryset=Genre.objects.all(),
         many=True,
-        allow_null=False,
-        allow_empty=False
+        allow_empty=False,
+        allow_null=False
     )
 
     class Meta:
@@ -49,9 +49,9 @@ class TitleCreateSerializer(serializers.ModelSerializer):
             'id', 'name', 'year', 'description', 'genre', 'category')
         model = Title
 
-        def to_representation(self, value):
-            serializer = TitleSerializer(value)
-            return serializer.data
+    def to_representation(self, instance):
+        serializer = TitleSerializer(instance)
+        return serializer.data
 
 
 class ReviewSerializer(serializers.ModelSerializer):
