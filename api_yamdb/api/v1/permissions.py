@@ -1,11 +1,6 @@
 from rest_framework.permissions import SAFE_METHODS, BasePermission
 
 
-class IsOwnerOrReadOnly(BasePermission):
-    def has_object_permission(self, request, view, obj):
-        return request.method in SAFE_METHODS or obj.author == request.user
-
-
 class IsSuperUserOrOwnerOrReadOnly(BasePermission):
     def has_permission(self, request, view):
         return (
@@ -16,9 +11,9 @@ class IsSuperUserOrOwnerOrReadOnly(BasePermission):
     def has_object_permission(self, request, view, obj):
         return (
             request.method in SAFE_METHODS
+            or request.user.is_moderator
+            or request.user.is_admin
             or obj.author == request.user
-            or request.user.role == 'moderator'
-            or request.user.role == 'admin'
         )
 
 
@@ -26,20 +21,16 @@ class IsSuperUserOrReadOnly(BasePermission):
     def has_permission(self, request, view):
         if not request.user.is_authenticated:
             return request.method in SAFE_METHODS
-        return (request.user.role == 'admin'
-                or request.user.is_superuser)
+        return request.user.is_admin
 
     def has_object_permission(self, request, view, obj):
         return (
             request.method in SAFE_METHODS
-            or request.user.role == 'moderator'
-            or request.user.role == 'admin'
+            or request.user.is_moderator
+            or request.user.is_admin
         )
 
 
 class IsSuperUser(BasePermission):
     def has_permission(self, request, view):
-        return request.user.is_superuser or request.user.role == 'admin'
-
-    def has_object_permission(self, request, view, obj):
-        return request.user.is_superuser or request.user.role == 'admin'
+        return request.user.is_superuser or request.user.is_admin

@@ -1,10 +1,8 @@
-from django.db.models import Avg
-from django.utils import timezone
+from django.contrib.auth.validators import UnicodeUsernameValidator
+
 from rest_framework import serializers
 
 from reviews.models import Category, Comment, CustomUser, Genre, Review, Title
-
-from .utils import validate_email, validate_name
 
 
 class GenreSerializer(serializers.ModelSerializer):
@@ -22,14 +20,9 @@ class CategorySerializer(serializers.ModelSerializer):
 
 
 class TitleSerializer(serializers.ModelSerializer):
-
     genre = GenreSerializer(many=True, read_only=True)
     category = CategorySerializer(read_only=True)
-    rating = serializers.SerializerMethodField()
-
-    def get_rating(self, obj):
-        rating = obj.reviews.aggregate(Avg('score')).get('score__avg')
-        return rating if not rating else round(rating, 0)
+    rating = serializers.FloatField(default=None, read_only=True)
 
     class Meta:
         fields = (
@@ -38,15 +31,17 @@ class TitleSerializer(serializers.ModelSerializer):
 
 
 class TitleCreateSerializer(serializers.ModelSerializer):
-
     category = serializers.SlugRelatedField(
         slug_field='slug',
-        queryset=Category.objects.all()
+        queryset=Category.objects.all(),
+        allow_null=False
     )
     genre = serializers.SlugRelatedField(
         slug_field='slug',
         queryset=Genre.objects.all(),
-        many=True
+        many=True,
+        allow_empty=False,
+        allow_null=False
     )
 
     class Meta:
@@ -54,13 +49,9 @@ class TitleCreateSerializer(serializers.ModelSerializer):
             'id', 'name', 'year', 'description', 'genre', 'category')
         model = Title
 
-        def validate_year(self, value):
-            year_now = timezone.now.year
-            if value <= 0 or value > year_now:
-                raise serializers.ValidationError(
-                    'Год создания должен быть нашей эры и не больше текущего.'
-                )
-            return value
+    def to_representation(self, instance):
+        serializer = TitleSerializer(instance)
+        return serializer.data
 
 
 class ReviewSerializer(serializers.ModelSerializer):
@@ -69,9 +60,8 @@ class ReviewSerializer(serializers.ModelSerializer):
     )
 
     class Meta:
-        fields = ('id', 'author', 'text', 'score', 'pub_date', 'title')
+        fields = ('id', 'author', 'text', 'score', 'pub_date')
         model = Review
-        read_only_fields = ('title',)
 
     def validate(self, data):
         if not self.context.get('request').method == 'POST':
@@ -93,7 +83,6 @@ class CommentSerializer(serializers.ModelSerializer):
     class Meta:
         fields = ('id', 'author', 'text', 'pub_date')
         model = Comment
-        read_only_fields = ('pub_date',)
 
 
 class CustomUserSerializer(serializers.ModelSerializer):
@@ -103,11 +92,6 @@ class CustomUserSerializer(serializers.ModelSerializer):
         model = CustomUser
         fields = ('username', 'email', 'first_name',
                   'last_name', 'bio', 'role',)
-        read_only_fields = (
-            'id', 'password', 'last_login', 'is_superuser', 'is_staff',
-            'is_active', 'date_joined', 'confirmation_code',
-            'groups', 'user_permissions'
-        )
 
 
 class CustomUserUpdateSerializer(serializers.ModelSerializer):
@@ -115,23 +99,10 @@ class CustomUserUpdateSerializer(serializers.ModelSerializer):
     class Meta:
 
         model = CustomUser
-        fields = ('first_name', 'last_name', 'bio', 'username', 'email',)
-        read_only_fields = (
-            'id', 'password', 'last_login', 'is_superuser', 'is_staff',
-            'is_active', 'date_joined', 'role', 'confirmation_code',
-            'is_email_confirmed', 'confirmation_code_created_at',
-            'groups', 'user_permissions'
+        fields = (
+            'username', 'email', 'first_name', 'last_name', 'bio', 'role'
         )
-
-    def validate_username(self, value):
-        """Validate the username field."""
-        validate_name(value)
-        return value
-
-    def validate_email(self, value):
-        """Validate the email field."""
-        validate_email(value)
-        return value
+        read_only_fields = ('role',)
 
 
 class SignUpSerializer(serializers.ModelSerializer):
@@ -148,27 +119,15 @@ class SignUpSerializer(serializers.ModelSerializer):
         return value
 
 
-class TokenSerializer(serializers.ModelSerializer):
-    username = serializers.CharField()
-    confirmation_code = serializers.CharField()
-
-    def validate(self, data):
-        username = data.get('username')
-        confirmation_code = data.get('confirmation_code')
-
-        if not username or not confirmation_code:
-            raise serializers.ValidationError(
-                'Обязательные для валидации поля отсутствуют'
-            )
-
-        try:
-            user = CustomUser.objects.get(username=username)
-            if user.confirmation_code != confirmation_code:
-                raise serializers.ValidationError('Неверный код подтверждения')
-        except CustomUser.DoesNotExist:
-            serializers.ValidationError('Пользователь не существует')
-
-        return data
+class TokenSerializer(serializers.Serializer):
+    username = serializers.CharField(
+        required=True,
+        max_length=150,
+        validators=[
+            UnicodeUsernameValidator(),
+        ]
+    )
+    confirmation_code = serializers.CharField(required=True)
 
     class Meta:
         model = CustomUser

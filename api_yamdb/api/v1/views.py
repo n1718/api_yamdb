@@ -9,7 +9,9 @@ from rest_framework.pagination import (LimitOffsetPagination,
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import AccessToken
+from django.db.models import Avg
 
+from .viewsets import CreateListDestroyViewSet
 from reviews.models import Category, CustomUser, Genre, Review, Title
 
 from .filters import TitleFilter
@@ -20,6 +22,7 @@ from .serializers import (CategorySerializer, CommentSerializer,
                           GenreSerializer, ReviewSerializer, SignUpSerializer,
                           TitleCreateSerializer, TitleSerializer,
                           TokenSerializer)
+from api_yamdb import settings
 
 
 class CustomUserViewSet(viewsets.ModelViewSet):
@@ -50,40 +53,18 @@ class CustomUserViewSet(viewsets.ModelViewSet):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-class GenreViewSet(viewsets.ModelViewSet):
+class GenreViewSet(CreateListDestroyViewSet):
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
-    permission_classes = (IsSuperUserOrReadOnly,)
-    http_method_names = ['get', 'post', 'patch', 'delete']
-    filter_backends = (filters.SearchFilter,)
-    search_fields = ('name',)
-    lookup_field = 'slug'
-
-    def retrieve(self, request, *args, **kwargs):
-        return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
-
-    def update(self, request, *args, **kwargs):
-        return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
 
-class CategoryViewSet(viewsets.ModelViewSet):
+class CategoryViewSet(CreateListDestroyViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
-    permission_classes = (IsSuperUserOrReadOnly,)
-    http_method_names = ['get', 'post', 'patch', 'delete']
-    filter_backends = (filters.SearchFilter,)
-    search_fields = ('name',)
-    lookup_field = 'slug'
-
-    def retrieve(self, request, *args, **kwargs):
-        return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
-
-    def update(self, request, *args, **kwargs):
-        return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
 
 class TitleViewSet(viewsets.ModelViewSet):
-    queryset = Title.objects.all()
+    queryset = Title.objects.annotate(rating=Avg('reviews__score'))
     serializer_class = TitleSerializer
     permission_classes = (IsSuperUserOrReadOnly,)
     pagination_class = LimitOffsetPagination
@@ -100,7 +81,7 @@ class TitleViewSet(viewsets.ModelViewSet):
 class ReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer
     permission_classes = (IsSuperUserOrOwnerOrReadOnly,)
-    http_method_names = ['get', 'post', 'head', 'patch', 'delete']
+    http_method_names = ['get', 'post', 'patch', 'delete']
 
     def get_title(self):
         return get_object_or_404(Title, id=self.kwargs['title_id'])
@@ -117,12 +98,14 @@ class ReviewViewSet(viewsets.ModelViewSet):
 class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
     permission_classes = (IsSuperUserOrOwnerOrReadOnly,)
-    http_method_names = ['get', 'post', 'head', 'patch', 'delete']
+    http_method_names = ['get', 'post', 'patch', 'delete']
     pagination_class = PageNumberPagination
     filter_backends = (DjangoFilterBackend,)
 
     def get_review(self):
-        return get_object_or_404(Review, id=self.kwargs['review_id'])
+        return get_object_or_404(
+            Review, id=self.kwargs['review_id'], title=self.kwargs['title_id']
+        )
 
     def get_queryset(self):
         return self.get_review().comments.all()
@@ -148,13 +131,11 @@ class SignUp(generics.CreateAPIView):
                 username=username, email=email
             )
             confirmation_code = default_token_generator.make_token(user)
-            user.confirmation_code = confirmation_code
-            user.save()
 
             send_mail(
                 'Код подтверждения',
                 f'Ваш код подтверждения: {confirmation_code}',
-                'example@email.com',
+                {settings.EMAIL_SENDER},
                 [email],
                 fail_silently=False,
             )
@@ -165,17 +146,28 @@ class SignUp(generics.CreateAPIView):
 
 
 class GetToken(generics.CreateAPIView):
+    def get_user(self, username):
+        return get_object_or_404(CustomUser, username=username)
+
     def post(self, request):
         serializer = TokenSerializer(data=request.data)
-        if serializer.is_valid():
+        if serializer.is_valid(raise_exception=True):
             username = serializer.validated_data.get('username')
-            user = get_object_or_404(CustomUser, username=username)
-            token = AccessToken.for_user(user)
-            token['payload'] = user.role
 
-            return Response(
-                {'token': str(token)},
-                status=status.HTTP_200_OK
-            )
+            if default_token_generator.check_token(
+                self.get_user(username),
+                serializer.validated_data.get('confirmation_code')
+            ):
+                token = AccessToken.for_user(
+                    self.get_user(username)
+                )
 
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+                return Response(
+                    {'token': str(token)},
+                    status=status.HTTP_200_OK
+                )
+
+            else:
+                return Response(
+                    serializer.errors, status=status.HTTP_400_BAD_REQUEST
+                )
