@@ -154,10 +154,14 @@ class GetToken(generics.CreateAPIView):
         if serializer.is_valid(raise_exception=True):
             username = serializer.validated_data.get('username')
 
-            if default_token_generator.check_token(
+            if not default_token_generator.check_token(
                 self.get_user(username),
                 serializer.validated_data.get('confirmation_code')
             ):
+                return Response(
+                    serializer.errors, status=status.HTTP_400_BAD_REQUEST
+                )
+            else:
                 token = AccessToken.for_user(
                     self.get_user(username)
                 )
@@ -165,9 +169,4 @@ class GetToken(generics.CreateAPIView):
                 return Response(
                     {'token': str(token)},
                     status=status.HTTP_200_OK
-                )
-
-            else:
-                return Response(
-                    serializer.errors, status=status.HTTP_400_BAD_REQUEST
                 )

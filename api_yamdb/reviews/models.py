@@ -19,7 +19,6 @@ class CustomUser(AbstractUser):
         unique=True,
         validators=[
             UnicodeUsernameValidator(),
-            RegexValidator(regex=r'^[\w.@+-]+\Z'),
             validate_username
         ],
         verbose_name='Имя пользователя',
@@ -65,13 +64,13 @@ class Category(models.Model):
         verbose_name='Слаг категории'
     )
 
-    def __str__(self) -> str:
-        return self.slug
-
     class Meta:
         verbose_name = 'Категория'
         verbose_name_plural = 'Категории'
         ordering = ['name']
+
+    def __str__(self) -> str:
+        return self.slug
 
 
 class Genre(models.Model):
@@ -179,8 +178,6 @@ class Comment(models.Model):
     review = models.ForeignKey(
         Review,
         on_delete=models.CASCADE,
-        null=False,
-        blank=False,
         related_name='comments'
     )
 
