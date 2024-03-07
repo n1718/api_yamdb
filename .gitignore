@@ -148,3 +148,7 @@ dmypy.json
 # папки со статикой и медиа
 media/
 
+# пустые файлы
+api_yamdb/api/admin.py
+api_yamdb/api/tests.py
+api_yamdb/reviews/tests.py
