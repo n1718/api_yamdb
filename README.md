@@ -46,7 +46,7 @@ python3 manage.py migrate
 Импорт csv файлов:
 
 ```
-python manage.py fill_db_from_csv
+python3 manage.py import_csv
 ```
 
 Запустить проект:

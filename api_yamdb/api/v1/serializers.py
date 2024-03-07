@@ -4,6 +4,8 @@ from rest_framework import serializers
 
 from reviews.models import Category, Comment, CustomUser, Genre, Review, Title
 
+from api_yamdb import settings
+
 
 class GenreSerializer(serializers.ModelSerializer):
 
@@ -50,8 +52,7 @@ class TitleCreateSerializer(serializers.ModelSerializer):
         model = Title
 
     def to_representation(self, instance):
-        serializer = TitleSerializer(instance)
-        return serializer.data
+        return TitleSerializer(instance).data
 
 
 class ReviewSerializer(serializers.ModelSerializer):
@@ -64,7 +65,7 @@ class ReviewSerializer(serializers.ModelSerializer):
         model = Review
 
     def validate(self, data):
-        if not self.context.get('request').method == 'POST':
+        if self.context.get('request').method != 'POST':
             return data
         author = self.context.get('request').user
         title_id = self.context.get('view').kwargs.get('title_id')
@@ -111,18 +112,11 @@ class SignUpSerializer(serializers.ModelSerializer):
         model = CustomUser
         fields = ('username', 'email',)
 
-    def validate_username(self, value):
-        if value.lower() == 'me':
-            raise serializers.ValidationError(
-                'Нельзя использовать "me" в качестве имени пользователя'
-            )
-        return value
-
 
 class TokenSerializer(serializers.Serializer):
     username = serializers.CharField(
         required=True,
-        max_length=150,
+        max_length=settings.USER_MAX_LENGTH,
         validators=[
             UnicodeUsernameValidator(),
         ]
