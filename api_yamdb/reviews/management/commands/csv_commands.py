@@ -17,7 +17,7 @@ DATA_DB = {
 }
 
 
-class CsvLoadCommand(BaseCommand):
+class Command(BaseCommand):
 
     def handle(self, *args, **kwargs):
         try:
